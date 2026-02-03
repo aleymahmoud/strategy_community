@@ -17,6 +17,7 @@ model Member {
   joinDate        DateTime         @default(now())
 
   // New fields
+  linkedin        String?          // LinkedIn profile URL
   membership      MembershipType?
   level           LevelType?
   experience      ExperienceType?
@@ -154,4 +155,37 @@ enum SeatStatus {
   AVAILABLE
   RESERVED
   BLOCKED
+}
+
+// Authentication Models
+model User {
+  id            String    @id @default(cuid())
+  username      String?   @unique
+  email         String    @unique
+  password      String    // Hashed password
+  name          String
+  role          UserRole  @default(USER)
+  isActive      Boolean   @default(true)
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?   // Admin who created this user
+
+  sessions      Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
 }
