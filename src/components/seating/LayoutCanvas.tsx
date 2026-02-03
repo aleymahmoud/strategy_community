@@ -135,7 +135,7 @@ export default function LayoutCanvas({
       zIndex: dragging === section.id ? 100 : isSelected ? 50 : 1,
     };
 
-    const selectionRing = isSelected ? "ring-2 ring-purple-500 ring-offset-2" : "";
+    const selectionRing = isSelected ? "ring-2 ring-[#d4a537] ring-offset-2" : "";
 
     if (section.type === "ROUND_TABLE") {
       return (
@@ -236,6 +236,112 @@ export default function LayoutCanvas({
               {i + 1}
             </div>
           ))}
+        </div>
+      );
+    }
+
+    // Stage
+    if (section.type === "STAGE") {
+      return (
+        <div
+          key={section.id}
+          className={`absolute cursor-move select-none ${dragging === section.id ? 'opacity-80' : ''}`}
+          style={baseStyle}
+          onMouseDown={(e) => handleMouseDown(e, section.id)}
+        >
+          <div className={`w-full h-full bg-gradient-to-b from-purple-100 to-purple-200 border-2 border-purple-400 rounded-lg flex flex-col items-center justify-center shadow-lg pointer-events-none ${selectionRing}`}>
+            <span className="text-2xl mb-1">🎭</span>
+            <span className="text-sm text-purple-800 font-semibold">{section.name}</span>
+          </div>
+          {/* Stage front edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-2 bg-purple-400 rounded-b-lg pointer-events-none" />
+        </div>
+      );
+    }
+
+    // Screen
+    if (section.type === "SCREEN") {
+      return (
+        <div
+          key={section.id}
+          className={`absolute cursor-move select-none ${dragging === section.id ? 'opacity-80' : ''}`}
+          style={baseStyle}
+          onMouseDown={(e) => handleMouseDown(e, section.id)}
+        >
+          <div className={`w-full h-full bg-gradient-to-b from-slate-700 to-slate-900 border-2 border-slate-500 rounded flex items-center justify-center shadow-lg pointer-events-none ${selectionRing}`}>
+            <span className="text-xs text-white font-medium flex items-center gap-1">
+              📺 {section.name}
+            </span>
+          </div>
+          {/* Screen stand */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-3 bg-slate-600 rounded-b pointer-events-none" />
+        </div>
+      );
+    }
+
+    // Catering
+    if (section.type === "CATERING") {
+      return (
+        <div
+          key={section.id}
+          className={`absolute cursor-move select-none ${dragging === section.id ? 'opacity-80' : ''}`}
+          style={baseStyle}
+          onMouseDown={(e) => handleMouseDown(e, section.id)}
+        >
+          <div className={`w-full h-full bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-lg flex flex-col items-center justify-center shadow-md pointer-events-none ${selectionRing}`}>
+            <span className="text-2xl mb-1">🍽️</span>
+            <span className="text-xs text-green-800 font-semibold">{section.name}</span>
+          </div>
+          {/* Decorative dots for food stations */}
+          <div className="absolute top-2 left-2 w-2 h-2 bg-green-300 rounded-full pointer-events-none" />
+          <div className="absolute top-2 right-2 w-2 h-2 bg-green-300 rounded-full pointer-events-none" />
+          <div className="absolute bottom-2 left-2 w-2 h-2 bg-green-300 rounded-full pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-2 h-2 bg-green-300 rounded-full pointer-events-none" />
+        </div>
+      );
+    }
+
+    // Sound System
+    if (section.type === "SOUND_SYSTEM") {
+      return (
+        <div
+          key={section.id}
+          className={`absolute cursor-move select-none ${dragging === section.id ? 'opacity-80' : ''}`}
+          style={baseStyle}
+          onMouseDown={(e) => handleMouseDown(e, section.id)}
+        >
+          <div className={`w-full h-full bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-400 rounded-lg flex flex-col items-center justify-center shadow-md pointer-events-none ${selectionRing}`}>
+            <span className="text-2xl mb-1">🔊</span>
+            <span className="text-xs text-red-800 font-semibold text-center px-1">{section.name}</span>
+          </div>
+          {/* Sound wave decorations */}
+          <div className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col gap-1 pointer-events-none">
+            <div className="w-1 h-3 bg-red-300 rounded-full" />
+            <div className="w-1 h-5 bg-red-400 rounded-full" />
+            <div className="w-1 h-3 bg-red-300 rounded-full" />
+          </div>
+        </div>
+      );
+    }
+
+    // Photo Spot
+    if (section.type === "PHOTO_SPOT") {
+      return (
+        <div
+          key={section.id}
+          className={`absolute cursor-move select-none ${dragging === section.id ? 'opacity-80' : ''}`}
+          style={baseStyle}
+          onMouseDown={(e) => handleMouseDown(e, section.id)}
+        >
+          <div className={`w-full h-full bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-400 rounded-lg flex flex-col items-center justify-center shadow-md pointer-events-none ${selectionRing}`}>
+            <span className="text-2xl mb-1">📷</span>
+            <span className="text-xs text-pink-800 font-semibold">{section.name}</span>
+          </div>
+          {/* Photo frame corners */}
+          <div className="absolute top-1 left-1 w-3 h-3 border-l-2 border-t-2 border-pink-400 rounded-tl pointer-events-none" />
+          <div className="absolute top-1 right-1 w-3 h-3 border-r-2 border-t-2 border-pink-400 rounded-tr pointer-events-none" />
+          <div className="absolute bottom-1 left-1 w-3 h-3 border-l-2 border-b-2 border-pink-400 rounded-bl pointer-events-none" />
+          <div className="absolute bottom-1 right-1 w-3 h-3 border-r-2 border-b-2 border-pink-400 rounded-br pointer-events-none" />
         </div>
       );
     }

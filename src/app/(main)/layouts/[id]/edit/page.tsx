@@ -70,15 +70,29 @@ export default function EditLayoutPage({
   async function handleAddSection(type: string) {
     if (!layout) return;
 
+    // Define element properties based on type
+    const elementConfig: Record<string, { name: string; capacity: number; width: number; height: number }> = {
+      ROUND_TABLE: { name: "Table", capacity: 8, width: 120, height: 120 },
+      RECTANGULAR_TABLE: { name: "Table", capacity: 6, width: 150, height: 80 },
+      ROW: { name: "Row", capacity: 10, width: 300, height: 50 },
+      CATERING: { name: "Catering", capacity: 0, width: 180, height: 80 },
+      SOUND_SYSTEM: { name: "Sound System", capacity: 0, width: 100, height: 100 },
+      STAGE: { name: "Stage", capacity: 0, width: 300, height: 150 },
+      SCREEN: { name: "Screen", capacity: 0, width: 200, height: 30 },
+      PHOTO_SPOT: { name: "Photo Spot", capacity: 0, width: 120, height: 120 },
+    };
+
+    const config = elementConfig[type] || { name: "Section", capacity: 6, width: 150, height: 100 };
+
     const sectionData = {
       layoutId: layout.id,
-      name: `${type === "ROUND_TABLE" ? "Table" : type === "ROW" ? "Row" : "Section"} ${layout.sections.length + 1}`,
+      name: `${config.name} ${layout.sections.filter(s => s.type === type).length + 1}`,
       type,
-      capacity: type === "ROUND_TABLE" ? 8 : type === "ROW" ? 10 : 6,
+      capacity: config.capacity,
       positionX: 100 + (layout.sections.length * 50) % 400,
       positionY: 100 + Math.floor(layout.sections.length / 4) * 150,
-      width: type === "ROUND_TABLE" ? 120 : type === "ROW" ? 300 : 150,
-      height: type === "ROUND_TABLE" ? 120 : type === "ROW" ? 50 : 100,
+      width: config.width,
+      height: config.height,
     };
 
     try {
@@ -208,7 +222,7 @@ export default function EditLayoutPage({
     return (
       <div className="text-center py-8">
         <p className="text-red-600 mb-4">Layout not found</p>
-        <Link href="/layouts" className="text-purple-500 hover:underline">
+        <Link href="/layouts" className="text-[#d4a537] hover:underline">
           Back to layouts
         </Link>
       </div>
@@ -227,14 +241,14 @@ export default function EditLayoutPage({
               type="text"
               value={layout.name}
               onChange={(e) => setLayout({ ...layout, name: e.target.value })}
-              className="text-2xl font-bold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 focus:outline-none px-1"
+              className="text-2xl font-bold text-[#2d3e50] bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#d4a537] focus:outline-none px-1"
               placeholder="Layout Name"
             />
             <input
               type="text"
               value={layout.description || ""}
               onChange={(e) => setLayout({ ...layout, description: e.target.value || null })}
-              className="text-sm text-gray-500 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 focus:outline-none px-1 mt-1"
+              className="text-sm text-gray-500 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#d4a537] focus:outline-none px-1 mt-1"
               placeholder="Add description..."
             />
           </div>
@@ -243,13 +257,13 @@ export default function EditLayoutPage({
           <button
             onClick={handleSave}
             disabled={loading}
-            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 disabled:opacity-50"
+            className="bg-[#2d3e50] text-white px-5 py-2.5 rounded-xl hover:bg-[#3d5068] disabled:opacity-50 font-medium transition-colors shadow-sm"
           >
             {loading ? "Saving..." : "Save Layout"}
           </button>
           <button
             onClick={handleDelete}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            className="bg-red-500 text-white px-4 py-2.5 rounded-xl hover:bg-red-600 font-medium transition-colors shadow-sm"
           >
             Delete
           </button>
@@ -265,27 +279,72 @@ export default function EditLayoutPage({
       <div className="flex gap-4 h-full">
         {/* Left Toolbar */}
         <div className="w-64 bg-white rounded-lg shadow p-4 space-y-4 overflow-y-auto">
-          {/* Add Section */}
+          {/* Add Elements */}
           <div>
-            <h3 className="font-semibold text-gray-800 mb-2">Add Section</h3>
-            <div className="space-y-2">
+            <h3 className="font-semibold text-gray-800 mb-2">Tables & Seating</h3>
+            <div className="space-y-1.5">
               <button
                 onClick={() => handleAddSection("ROUND_TABLE")}
-                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-left text-sm"
+                className="w-full px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
               >
-                + Round Table
+                <span className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 text-xs">⬤</span>
+                Round Table
               </button>
               <button
                 onClick={() => handleAddSection("RECTANGULAR_TABLE")}
-                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-left text-sm"
+                className="w-full px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
               >
-                + Rectangular Table
+                <span className="w-6 h-6 rounded bg-amber-200 flex items-center justify-center text-amber-700 text-xs">▬</span>
+                Rectangular Table
               </button>
               <button
                 onClick={() => handleAddSection("ROW")}
-                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-left text-sm"
+                className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
               >
-                + Row of Seats
+                <span className="w-6 h-6 rounded bg-blue-200 flex items-center justify-center text-blue-700 text-xs">▤</span>
+                Row of Seats
+              </button>
+            </div>
+          </div>
+
+          {/* Venue Elements */}
+          <div className="border-t pt-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Venue Elements</h3>
+            <div className="space-y-1.5">
+              <button
+                onClick={() => handleAddSection("STAGE")}
+                className="w-full px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
+              >
+                <span className="w-6 h-6 rounded bg-purple-200 flex items-center justify-center text-purple-700 text-xs">🎭</span>
+                Stage
+              </button>
+              <button
+                onClick={() => handleAddSection("SCREEN")}
+                className="w-full px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
+              >
+                <span className="w-6 h-6 rounded bg-slate-200 flex items-center justify-center text-slate-700 text-xs">📺</span>
+                Screen
+              </button>
+              <button
+                onClick={() => handleAddSection("CATERING")}
+                className="w-full px-3 py-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
+              >
+                <span className="w-6 h-6 rounded bg-green-200 flex items-center justify-center text-green-700 text-xs">🍽️</span>
+                Catering
+              </button>
+              <button
+                onClick={() => handleAddSection("SOUND_SYSTEM")}
+                className="w-full px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
+              >
+                <span className="w-6 h-6 rounded bg-red-200 flex items-center justify-center text-red-700 text-xs">🔊</span>
+                Sound System
+              </button>
+              <button
+                onClick={() => handleAddSection("PHOTO_SPOT")}
+                className="w-full px-3 py-2 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-lg text-left text-sm flex items-center gap-2 transition-colors"
+              >
+                <span className="w-6 h-6 rounded bg-pink-200 flex items-center justify-center text-pink-700 text-xs">📷</span>
+                Photo Spot
               </button>
             </div>
           </div>
@@ -320,33 +379,48 @@ export default function EditLayoutPage({
 
           {/* Sections List */}
           <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-800 mb-2">Sections ({layout.sections.length})</h3>
+            <h3 className="font-semibold text-gray-800 mb-2">Elements ({layout.sections.length})</h3>
             {layout.sections.length === 0 ? (
-              <p className="text-sm text-gray-500">No sections yet</p>
+              <p className="text-sm text-gray-500">No elements yet</p>
             ) : (
               <ul className="space-y-1 max-h-40 overflow-y-auto">
-                {layout.sections.map((section) => (
-                  <li
-                    key={section.id}
-                    className={`flex justify-between items-center p-2 rounded text-sm cursor-pointer ${
-                      selectedSection === section.id
-                        ? "bg-purple-100 border border-purple-300"
-                        : "bg-gray-50 hover:bg-gray-100"
-                    }`}
-                    onClick={() => setSelectedSection(section.id)}
-                  >
-                    <span className="truncate">{section.name}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSection(section.id);
-                      }}
-                      className="text-red-500 hover:text-red-700 ml-2"
+                {layout.sections.map((section) => {
+                  const typeColors: Record<string, string> = {
+                    ROUND_TABLE: "bg-amber-400",
+                    RECTANGULAR_TABLE: "bg-amber-400",
+                    ROW: "bg-blue-400",
+                    STAGE: "bg-purple-400",
+                    SCREEN: "bg-slate-600",
+                    CATERING: "bg-green-400",
+                    SOUND_SYSTEM: "bg-red-400",
+                    PHOTO_SPOT: "bg-pink-400",
+                  };
+                  return (
+                    <li
+                      key={section.id}
+                      className={`flex justify-between items-center p-2 rounded text-sm cursor-pointer ${
+                        selectedSection === section.id
+                          ? "bg-[#d4a537]/10 border border-[#d4a537]"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }`}
+                      onClick={() => setSelectedSection(section.id)}
                     >
-                      x
-                    </button>
-                  </li>
-                ))}
+                      <div className="flex items-center gap-2 truncate">
+                        <span className={`w-2 h-2 rounded-full ${typeColors[section.type] || "bg-gray-400"}`} />
+                        <span className="truncate">{section.name}</span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSection(section.id);
+                        }}
+                        className="text-red-500 hover:text-red-700 ml-2"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -368,21 +442,24 @@ export default function EditLayoutPage({
                   />
                 </div>
 
-                <div>
-                  <label className="text-gray-600 block mb-1">Seats: {selectedSectionData.capacity}</label>
-                  <input
-                    type="range"
-                    min="2"
-                    max="20"
-                    value={selectedSectionData.capacity}
-                    onChange={(e) =>
-                      handleUpdateSection(selectedSectionData.id, {
-                        capacity: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                </div>
+                {/* Only show seats slider for seating elements */}
+                {["ROUND_TABLE", "RECTANGULAR_TABLE", "ROW"].includes(selectedSectionData.type) && (
+                  <div>
+                    <label className="text-gray-600 block mb-1">Seats: {selectedSectionData.capacity}</label>
+                    <input
+                      type="range"
+                      min="2"
+                      max="20"
+                      value={selectedSectionData.capacity}
+                      onChange={(e) =>
+                        handleUpdateSection(selectedSectionData.id, {
+                          capacity: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -504,7 +581,12 @@ export default function EditLayoutPage({
               </div>
               <p className="text-gray-500">
                 Total seats:{" "}
-                {layout.sections.reduce((sum, s) => sum + s.capacity, 0)}
+                {layout.sections
+                  .filter(s => ["ROUND_TABLE", "RECTANGULAR_TABLE", "ROW"].includes(s.type))
+                  .reduce((sum, s) => sum + s.capacity, 0)}
+              </p>
+              <p className="text-gray-500 text-xs">
+                Elements: {layout.sections.length}
               </p>
             </div>
           </div>
