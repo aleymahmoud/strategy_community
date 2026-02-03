@@ -70,12 +70,12 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm border-b border-gray-100">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center">
             <img
               src="/logo.png"
               alt="The Strategy Community"
-              className="h-16 w-auto"
+              className="h-24 w-auto"
             />
           </Link>
           <div className="flex items-center gap-1">
