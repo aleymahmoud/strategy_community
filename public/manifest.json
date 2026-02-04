@@ -1,0 +1,49 @@
+{
+  "name": "The Strategy Community",
+  "short_name": "Strategy",
+  "description": "Community Management Application for The Strategy Community",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2d3e50",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View upcoming events",
+      "url": "/events",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Members",
+      "short_name": "Members",
+      "description": "Manage members",
+      "url": "/members",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Layouts",
+      "short_name": "Layouts",
+      "description": "Design venue layouts",
+      "url": "/layouts",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

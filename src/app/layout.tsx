@@ -1,12 +1,30 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The Strategy Community",
-  description: "Community Management Application",
+  description: "Community Management Application for The Strategy Community",
+  manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
+    apple: "/logo.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Strategy Community",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#2d3e50",
 };
 
 export default function RootLayout({
