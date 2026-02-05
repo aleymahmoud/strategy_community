@@ -26,10 +26,10 @@ export default function AddAttendeeForm({ eventId, existingAttendeeIds }: AddAtt
   useEffect(() => {
     async function fetchMembers() {
       try {
-        const res = await fetch("/api/members");
+        const res = await fetch("/api/members?limit=1000");
         if (res.ok) {
           const data = await res.json();
-          setMembers(data);
+          setMembers(data.members || []);
         }
       } catch (error) {
         console.error("Failed to fetch members:", error);

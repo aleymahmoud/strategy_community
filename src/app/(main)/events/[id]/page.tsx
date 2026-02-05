@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import DeleteEventButton from "@/components/events/DeleteEventButton";
-import AddAttendeeForm from "@/components/events/AddAttendeeForm";
+import EventAttendees from "@/components/events/EventAttendees";
 
 export const dynamic = "force-dynamic";
 
@@ -33,67 +33,81 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  const statusColors: Record<string, string> = {
-    INVITED: "bg-gray-100 text-gray-600",
-    CONFIRMED: "bg-blue-100 text-blue-600",
-    DECLINED: "bg-red-100 text-red-600",
-    ATTENDED: "bg-green-100 text-green-600",
-    ABSENT: "bg-yellow-100 text-yellow-600",
-  };
+  const attendeesData = event.attendees.map((a) => ({
+    id: a.id,
+    memberId: a.memberId,
+    status: a.status,
+    member: { id: a.member.id, name: a.member.name },
+    seat: a.seat ? { label: a.seat.label } : null,
+  }));
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
+      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/events" className="text-gray-500 hover:text-gray-700">
-          &larr; Back
+        <Link href="/events" className="text-gray-400 hover:text-[#2d3e50] transition-colors">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </Link>
-        <h1 className="text-3xl font-bold text-gray-800">{event.name}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#2d3e50]">{event.name}</h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-start mb-6">
+      {/* Event Info Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div className="space-y-2">
-            <p className="text-lg">
-              <span className="text-gray-500">Date:</span>{" "}
-              {new Date(event.date).toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
+            <div className="flex items-center gap-2 text-[#2d3e50]">
+              <svg className="w-5 h-5 text-[#d4a537]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium">
+                {new Date(event.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
             {event.location && (
-              <p>
-                <span className="text-gray-500">Location:</span> {event.location}
-              </p>
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg className="w-5 h-5 text-[#d4a537]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{event.location}</span>
+              </div>
             )}
             {event.layout && (
-              <p>
-                <span className="text-gray-500">Layout:</span>{" "}
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg className="w-5 h-5 text-[#d4a537]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
                 <Link
                   href={`/layouts/${event.layout.id}/edit`}
-                  className="text-purple-500 hover:underline"
+                  className="text-[#d4a537] hover:underline"
                 >
                   {event.layout.name}
                 </Link>
-              </p>
+              </div>
             )}
             {event.description && (
-              <p className="text-gray-600 mt-4">{event.description}</p>
+              <p className="text-gray-500 text-sm mt-3 pt-3 border-t border-gray-100">{event.description}</p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Link
               href={`/events/${event.id}/seating`}
-              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              className="px-4 py-2 bg-[#2d3e50] text-white rounded-xl hover:bg-[#3d5068] transition-colors text-sm font-medium shadow-sm"
             >
               Seating Plan
             </Link>
             <Link
               href={`/events/${event.id}/edit`}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-200 rounded-xl text-[#2d3e50] hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               Edit
             </Link>
@@ -102,65 +116,8 @@ export default async function EventDetailPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Attendees ({event.attendees.length})
-          </h2>
-          <AddAttendeeForm
-            eventId={event.id}
-            existingAttendeeIds={event.attendees.map((a) => a.memberId)}
-          />
-        </div>
-
-        {event.attendees.length === 0 ? (
-          <p className="text-gray-500">No attendees added yet. Click &quot;+ Add Attendees&quot; to invite members.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-4 py-2 text-sm font-medium text-gray-500">
-                    Name
-                  </th>
-                  <th className="text-left px-4 py-2 text-sm font-medium text-gray-500">
-                    Status
-                  </th>
-                  <th className="text-left px-4 py-2 text-sm font-medium text-gray-500">
-                    Seat
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {event.attendees.map((attendee) => (
-                  <tr key={attendee.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/members/${attendee.member.id}`}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {attendee.member.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          statusColors[attendee.status] || "bg-gray-100"
-                        }`}
-                      >
-                        {attendee.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {attendee.seat?.label || "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Attendees Section */}
+      <EventAttendees eventId={event.id} attendees={attendeesData} />
     </div>
   );
 }
