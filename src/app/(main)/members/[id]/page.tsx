@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import DeleteMemberButton from "@/components/members/DeleteMemberButton";
+import MemberProfileNav from "@/components/members/MemberProfileNav";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,22 @@ async function getMember(id: string) {
   });
 }
 
+async function getAdjacentMembers(name: string) {
+  const [prev, next] = await Promise.all([
+    prisma.member.findFirst({
+      where: { name: { lt: name } },
+      orderBy: { name: "desc" },
+      select: { id: true, name: true },
+    }),
+    prisma.member.findFirst({
+      where: { name: { gt: name } },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+  return { prev, next };
+}
+
 export default async function MemberDetailPage({
   params,
 }: {
@@ -66,6 +83,8 @@ export default async function MemberDetailPage({
   if (!member) {
     notFound();
   }
+
+  const { prev, next } = await getAdjacentMembers(member.name);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -79,6 +98,12 @@ export default async function MemberDetailPage({
             {MEMBERSHIP_LABELS[member.membership] || member.membership}
           </span>
         )}
+        <MemberProfileNav
+          currentId={member.id}
+          currentName={member.name}
+          prevMember={prev}
+          nextMember={next}
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
