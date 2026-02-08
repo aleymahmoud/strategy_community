@@ -183,6 +183,22 @@ export default function EditMemberPage({
           </div>
         )}
 
+        <div className="mb-6 flex gap-4 border-b pb-6">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Update Member"}
+          </button>
+          <Link
+            href={`/members/${id}`}
+            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Info Section */}
           <div className="space-y-4">
@@ -453,21 +469,6 @@ export default function EditMemberPage({
           </div>
         </div>
 
-        <div className="mt-6 flex gap-4 border-t pt-6">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Update Member"}
-          </button>
-          <Link
-            href={`/members/${id}`}
-            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </Link>
-        </div>
       </form>
     </div>
   );
