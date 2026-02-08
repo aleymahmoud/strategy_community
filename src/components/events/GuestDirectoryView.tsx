@@ -120,7 +120,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
       </div>
 
       {/* PDF Content */}
-      <div ref={printRef} className="max-w-5xl mx-auto py-8 print:p-0 print:max-w-none" style={{ fontFamily: "'Kohinoor', 'Kohinoor Devanagari', system-ui, sans-serif" }}>
+      <div ref={printRef} className="max-w-5xl mx-auto py-8 print:p-0 print:max-w-none" style={{ fontFamily: "'Kohinoor Bangla', system-ui, sans-serif" }}>
         {/* === COVER PAGE === */}
         <div
           data-pdf-page
@@ -132,7 +132,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
 
           {/* Large faded S logo watermark in center */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06]">
-            <img src="/logo-icon.png" alt="" className="w-[420px] h-auto" />
+            <img src="/logo-icon.png" alt="" className="w-[420px] h-auto" style={{ filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -183,12 +183,11 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             <div className="absolute inset-0 bg-white" />
 
             {/* Header */}
-            <div className="relative px-12 pt-8 pb-4 flex items-center justify-between">
+            <div className="relative px-12 pt-8 pb-4">
               <h2 className="text-[36px] font-bold leading-none">
                 <span style={{ color: NAVY }}>GUEST </span>
                 <span style={{ color: GOLD }}>LIST</span>
               </h2>
-              <img src="/logo-icon.png" alt="" className="h-12 w-auto opacity-30" />
             </div>
 
             {/* Gold divider line */}
@@ -223,14 +222,14 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
                   {/* Info */}
                   <div className="min-w-0 pt-1">
                     <h3
-                      className="text-[18px] font-bold leading-tight truncate"
+                      className="text-[14px] font-bold leading-snug truncate"
                       style={{ color: GOLD }}
                     >
                       {guest.name}
                     </h3>
                     {guest.title && (
                       <p
-                        className="text-[14px] leading-snug mt-1"
+                        className="text-[14px] font-bold leading-snug mt-1"
                         style={{ color: NAVY }}
                       >
                         {guest.title}
@@ -238,8 +237,8 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
                     )}
                     {guest.company && (
                       <p
-                        className="text-[14px] leading-snug font-medium"
-                        style={{ color: `${NAVY}99` }}
+                        className="text-[14px] font-bold leading-snug"
+                        style={{ color: NAVY }}
                       >
                         {guest.company}
                       </p>
@@ -251,7 +250,6 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
 
             {/* Footer */}
             <div className="absolute bottom-0 left-0 right-0">
-              <div className="mx-12 h-[2px] mb-4" style={{ backgroundColor: `${GOLD}40` }} />
               <div className="px-12 pb-6 flex items-center justify-between">
                 <p className="text-[10px] tracking-[0.12em] uppercase font-extrabold" style={{ color: GOLD }}>
                   This is an exclusive event and attendance requires an invitation
@@ -272,7 +270,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           <div className="absolute top-0 left-0 right-0" style={{ height: "80%", backgroundColor: NAVY }}>
             {/* Large faded logo watermark - right side */}
             <div className="absolute top-1/2 right-8 -translate-y-1/2 opacity-[0.12]">
-              <img src="/logo-icon.png" alt="" className="w-[380px] h-auto" />
+              <img src="/logo-icon.png" alt="" className="w-[380px] h-auto" style={{ filter: "grayscale(100%)" }} />
             </div>
 
             {/* Text - left aligned */}
