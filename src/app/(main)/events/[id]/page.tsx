@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import DeleteEventButton from "@/components/events/DeleteEventButton";
 import EventAttendees from "@/components/events/EventAttendees";
+import DirectoryQRCode from "@/components/events/DirectoryQRCode";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +99,18 @@ export default async function EventDetailPage({
               <p className="text-gray-500 text-sm mt-3 pt-3 border-t border-gray-100">{event.description}</p>
             )}
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Link
+              href={`/directory/${event.id}`}
+              target="_blank"
+              className="px-4 py-2 text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium shadow-sm flex items-center gap-1.5"
+              style={{ backgroundColor: "#d4a537" }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Guest Directory
+            </Link>
             <Link
               href={`/events/${event.id}/seating`}
               className="px-4 py-2 bg-[#2d3e50] text-white rounded-xl hover:bg-[#3d5068] transition-colors text-sm font-medium shadow-sm"
@@ -114,6 +126,11 @@ export default async function EventDetailPage({
             <DeleteEventButton eventId={event.id} />
           </div>
         </div>
+      </div>
+
+      {/* QR Code Section */}
+      <div className="mb-6">
+        <DirectoryQRCode eventId={event.id} eventName={event.name} />
       </div>
 
       {/* Attendees Section */}

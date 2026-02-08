@@ -110,6 +110,28 @@ body {
   }
 }
 
+/* Print styles for Guest Directory */
+@media print {
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  nav {
+    display: none !important;
+  }
+
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}
+
 /* Hide scrollbars on mobile for cleaner UI */
 @media (max-width: 1024px) {
   .hide-scrollbar::-webkit-scrollbar {
