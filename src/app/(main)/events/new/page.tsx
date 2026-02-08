@@ -25,14 +25,22 @@ export default function NewEventPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const [layoutsRes, membersRes] = await Promise.all([
-        fetch("/api/layouts"),
-        fetch("/api/members"),
-      ]);
-      const layoutsData = await layoutsRes.json();
-      const membersData = await membersRes.json();
-      setLayouts(layoutsData);
-      setMembers(membersData);
+      try {
+        const [layoutsRes, membersRes] = await Promise.all([
+          fetch("/api/layouts"),
+          fetch("/api/members?limit=1000"),
+        ]);
+        if (layoutsRes.ok) {
+          const layoutsData = await layoutsRes.json();
+          setLayouts(layoutsData);
+        }
+        if (membersRes.ok) {
+          const membersData = await membersRes.json();
+          setMembers(membersData.members || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+      }
     }
     fetchData();
   }, []);

@@ -71,16 +71,20 @@ export default function AddAttendeeForm({ eventId, existingAttendeeIds }: AddAtt
     setAdding(true);
 
     try {
+      let addedCount = 0;
       for (const memberId of selectedMembers) {
-        await fetch(`/api/events/${eventId}/attendees`, {
+        const res = await fetch(`/api/events/${eventId}/attendees`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ memberId }),
         });
+        if (res.ok) addedCount++;
       }
-      setSelectedMembers([]);
-      setShowForm(false);
-      router.refresh();
+      if (addedCount > 0) {
+        setSelectedMembers([]);
+        setShowForm(false);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Failed to add attendees:", error);
     } finally {

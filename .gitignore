@@ -32,3 +32,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code
+.claude/
+
+# temp files
+tmp_*.json
+
+# member photos (served locally, not committed to repo)
+/public/members/
+
+# one-off scripts
+/scripts/
+
+# loose project files
+*.xlsx
+*.jfif
+nul
+Logo.jpg
+thestrategycommunity_cover.jpg
+strategy\ community\ final\ logo.png
+strategy\ community\ logo\ -04.png
+Guest\ Directory\ meetup\ 19.pdf

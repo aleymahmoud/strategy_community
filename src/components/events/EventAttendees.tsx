@@ -33,6 +33,7 @@ export default function EventAttendees({ eventId, attendees: initialAttendees }:
   const [searchTerm, setSearchTerm] = useState("");
   const [addingId, setAddingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const statusColors: Record<string, string> = {
     INVITED: "bg-gray-100 text-gray-600",
@@ -70,6 +71,7 @@ export default function EventAttendees({ eventId, attendees: initialAttendees }:
 
   async function handleQuickAdd(memberId: string) {
     setAddingId(memberId);
+    setError(null);
     try {
       const res = await fetch(`/api/events/${eventId}/attendees`, {
         method: "POST",
@@ -87,9 +89,13 @@ export default function EventAttendees({ eventId, attendees: initialAttendees }:
             seat: null,
           },
         ]);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || "Failed to add attendee");
       }
-    } catch (error) {
-      console.error("Failed to add attendee:", error);
+    } catch (err) {
+      console.error("Failed to add attendee:", err);
+      setError("Network error - please try again");
     } finally {
       setAddingId(null);
     }
@@ -229,6 +235,13 @@ export default function EventAttendees({ eventId, attendees: initialAttendees }:
             />
           </div>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="mx-3 mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+            {error}
+          </div>
+        )}
 
         {/* Members List */}
         <div className="flex-1 overflow-y-auto">
