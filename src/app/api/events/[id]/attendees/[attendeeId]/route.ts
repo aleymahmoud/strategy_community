@@ -8,11 +8,15 @@ export async function PUT(
   try {
     const { attendeeId } = await params;
     const body = await request.json();
-    const { seatId, status } = body;
+    const { seatId, status, whatsapp, followUp, introCall, comments } = body;
 
     const updateData: Record<string, unknown> = {};
     if (seatId !== undefined) updateData.seatId = seatId;
     if (status !== undefined) updateData.status = status;
+    if (whatsapp !== undefined) updateData.whatsapp = whatsapp;
+    if (followUp !== undefined) updateData.followUp = followUp;
+    if (introCall !== undefined) updateData.introCall = introCall;
+    if (comments !== undefined) updateData.comments = comments;
 
     const attendee = await prisma.eventAttendee.update({
       where: { id: attendeeId },

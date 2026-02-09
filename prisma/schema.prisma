@@ -83,6 +83,10 @@ model EventAttendee {
   eventId   String
   seatId    String?
   status    AttendeeStatus @default(INVITED)
+  whatsapp  Boolean @default(false)
+  followUp  Boolean @default(false)
+  introCall Boolean @default(false)
+  comments  String?
   createdAt DateTime @default(now())
 
   member    Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
@@ -140,6 +144,7 @@ enum AttendeeStatus {
   INVITED
   CONFIRMED
   DECLINED
+  TENTATIVE
   ATTENDED
   ABSENT
 }

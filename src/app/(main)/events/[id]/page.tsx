@@ -38,7 +38,18 @@ export default async function EventDetailPage({
     id: a.id,
     memberId: a.memberId,
     status: a.status,
-    member: { id: a.member.id, name: a.member.name },
+    whatsapp: a.whatsapp,
+    followUp: a.followUp,
+    introCall: a.introCall,
+    comments: a.comments,
+    member: {
+      id: a.member.id,
+      name: a.member.name,
+      membership: a.member.membership,
+      level: a.member.level,
+      experience: a.member.experience,
+      communication: a.member.communication,
+    },
     seat: a.seat ? { label: a.seat.label } : null,
   }));
 

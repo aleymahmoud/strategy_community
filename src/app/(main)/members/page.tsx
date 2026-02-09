@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { membershipColors, formatMembership } from '@/lib/constants';
 
 interface Member {
   id: string;
@@ -58,14 +59,6 @@ const EXPERIENCE_OPTIONS = [
   { value: 'JUNIOR', label: 'Junior' },
 ];
 
-const membershipColors: Record<string, { bg: string; text: string }> = {
-  PREMIUM: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  CORE_MEMBER: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  FREQUENT_GUEST: { bg: 'bg-green-100', text: 'text-green-700' },
-  GUEST: { bg: 'bg-gray-100', text: 'text-gray-700' },
-  POTENTIAL_GUEST: { bg: 'bg-purple-100', text: 'text-purple-700' },
-  GRAY: { bg: 'bg-slate-100', text: 'text-slate-600' },
-};
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -140,10 +133,6 @@ export default function MembersPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  const formatMembership = (value: string | null) => {
-    if (!value) return null;
-    return value.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
 
   return (
     <div className="h-[calc(100vh-6rem)] lg:h-[calc(100vh-8rem)] flex flex-col">
