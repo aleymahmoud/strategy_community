@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
+import PhotoCropModal from "@/components/members/PhotoCropModal";
 
 const MEMBERSHIP_OPTIONS = [
   { value: "", label: "Select Membership" },
@@ -68,18 +69,27 @@ export default function EditMemberPage({
   const [member, setMember] = useState<Member | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setPhotoPreview(base64);
-        setPhotoBase64(base64);
+        setCropImageSrc(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  function handleCropConfirm(croppedBase64: string) {
+    setPhotoPreview(croppedBase64);
+    setPhotoBase64(croppedBase64);
+    setCropImageSrc(null);
+  }
+
+  function handleCropCancel() {
+    setCropImageSrc(null);
   }
 
   useEffect(() => {
@@ -470,6 +480,15 @@ export default function EditMemberPage({
         </div>
 
       </form>
+
+      {/* Photo Crop Modal */}
+      {cropImageSrc && (
+        <PhotoCropModal
+          imageSrc={cropImageSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }
