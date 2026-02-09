@@ -504,12 +504,13 @@ export default function SeatingPage({
             className="bg-gray-50 border border-gray-200"
             style={{
               width: event.layout.width + 300,
-              height: event.layout.height + 160,
+              height: event.layout.height + 200,
               minWidth: event.layout.width + 300,
-              minHeight: event.layout.height + 160,
+              minHeight: event.layout.height + 200,
+              boxSizing: "content-box",
               paddingTop: 80,
               paddingBottom: 80,
-              paddingLeft: 150,
+              paddingLeft: 40,
               paddingRight: 150,
             }}
           >
