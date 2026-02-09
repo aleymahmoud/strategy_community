@@ -110,7 +110,9 @@ export default function EditEventPage({
     );
   }
 
-  const dateValue = new Date(event.date).toISOString().slice(0, 16);
+  // Convert UTC date to Cairo time (UTC+2) for datetime-local input
+  const cairoDate = new Date(new Date(event.date).getTime() + 2 * 60 * 60 * 1000);
+  const dateValue = cairoDate.toISOString().slice(0, 16);
 
   return (
     <div className="max-w-2xl mx-auto">

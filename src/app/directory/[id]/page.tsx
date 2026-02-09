@@ -9,6 +9,9 @@ async function getEventWithAttendees(id: string) {
     where: { id },
     include: {
       attendees: {
+        where: {
+          status: { in: ["CONFIRMED", "ATTENDED"] },
+        },
         include: {
           member: true,
         },

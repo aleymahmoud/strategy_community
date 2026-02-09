@@ -81,11 +81,11 @@ export default async function EventsPage() {
                       : "bg-gradient-to-br from-[#d4a537] to-[#c49730]"
                   }`}>
                     <span className={`text-4xl font-bold ${isPast ? "text-gray-400" : "text-white"}`} style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                      {eventDate.getDate()}
+                      {parseInt(eventDate.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'Africa/Cairo' }))}
                     </span>
                     <div className={`text-center ${isPast ? "text-gray-400" : "text-white/80"}`}>
                       <p className="text-sm font-medium uppercase tracking-wider">
-                        {eventDate.toLocaleDateString('en-US', { month: 'short' })}
+                        {eventDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'Africa/Cairo' })}
                       </p>
                       <p className="text-xs">
                         {eventDate.getFullYear()}
@@ -117,7 +117,7 @@ export default async function EventsPage() {
                             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {eventDate.toLocaleDateString('en-US', { weekday: 'long' })}
+                            {eventDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' })}
                           </span>
                           {event.location && (
                             <span className="flex items-center gap-1.5">

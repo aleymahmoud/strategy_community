@@ -191,59 +191,64 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             </div>
 
             {/* Gold divider line */}
-            <div className="mx-12 h-[2px] mb-6" style={{ backgroundColor: GOLD }} />
+            <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
-            {/* Guest Grid - 2 columns x 4 rows */}
-            <div className="relative px-12 grid grid-cols-2 gap-x-10 gap-y-6">
-              {pageGuests.map((guest) => (
-                <div key={guest.id} className="flex items-start gap-5">
-                  {/* Photo - Arch frame */}
-                  <div
-                    className="flex-shrink-0 overflow-hidden border-2 border-gray-200"
-                    style={{
-                      width: 78,
-                      height: 100,
-                      borderRadius: "30px 0 0 0",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {guest.photo ? (
-                      <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
-                    ) : (
+            {/* Guest Grid - 2 columns x 4 rows, spread to fill page */}
+            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 80mm - 50mm)", paddingTop: "20px", paddingBottom: "8px" }}>
+              {/* Split guests into rows of 2 */}
+              {Array.from({ length: Math.ceil(pageGuests.length / 2) }, (_, rowIdx) => (
+                <div key={rowIdx} className="grid grid-cols-2 gap-x-10">
+                  {pageGuests.slice(rowIdx * 2, rowIdx * 2 + 2).map((guest) => (
+                    <div key={guest.id} className="flex items-start gap-5">
+                      {/* Photo - Arch frame */}
                       <div
-                        className="w-full h-full flex items-center justify-center text-xl font-bold bg-gradient-to-br from-gray-100 to-gray-200"
-                        style={{ color: NAVY }}
+                        className="flex-shrink-0 overflow-hidden border-2 border-gray-200"
+                        style={{
+                          width: 78,
+                          height: 100,
+                          borderRadius: "30px 0 0 0",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                        }}
                       >
-                        {guest.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                        {guest.photo ? (
+                          <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center text-xl font-bold bg-gradient-to-br from-gray-100 to-gray-200"
+                            style={{ color: NAVY }}
+                          >
+                            {guest.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Info */}
-                  <div className="min-w-0 pt-1">
-                    <h3
-                      className="text-[14px] font-bold leading-snug truncate"
-                      style={{ color: GOLD }}
-                    >
-                      {guest.name}
-                    </h3>
-                    {guest.title && (
-                      <p
-                        className="text-[14px] font-bold leading-snug mt-1"
-                        style={{ color: NAVY }}
-                      >
-                        {guest.title}
-                      </p>
-                    )}
-                    {guest.company && (
-                      <p
-                        className="text-[14px] font-bold leading-snug"
-                        style={{ color: NAVY }}
-                      >
-                        {guest.company}
-                      </p>
-                    )}
-                  </div>
+                      {/* Info */}
+                      <div className="min-w-0 pt-1">
+                        <h3
+                          className="text-[14px] font-bold leading-snug truncate"
+                          style={{ color: GOLD }}
+                        >
+                          {guest.name}
+                        </h3>
+                        {guest.title && (
+                          <p
+                            className="text-[14px] font-bold leading-snug mt-1"
+                            style={{ color: NAVY }}
+                          >
+                            {guest.title}
+                          </p>
+                        )}
+                        {guest.company && (
+                          <p
+                            className="text-[14px] font-bold leading-snug"
+                            style={{ color: NAVY }}
+                          >
+                            {guest.company}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

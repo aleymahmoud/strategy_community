@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const event = await prisma.event.create({
       data: {
         name: name.trim(),
-        date: new Date(date),
+        date: new Date(date.includes('+') || date.includes('Z') ? date : date + '+02:00'),
         location: location?.trim() || null,
         description: description?.trim() || null,
         layoutId: layoutId || null,

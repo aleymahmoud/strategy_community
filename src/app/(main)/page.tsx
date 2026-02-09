@@ -217,15 +217,15 @@ export default async function Dashboard() {
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#d4a537] to-[#c49730] flex flex-col items-center justify-center text-white shadow-lg shadow-[#d4a537]/20">
-                      <span className="text-lg font-bold leading-none">{new Date(event.date).getDate()}</span>
+                      <span className="text-lg font-bold leading-none">{parseInt(new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'Africa/Cairo' }))}</span>
                       <span className="text-[10px] uppercase tracking-wider opacity-80">
-                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', timeZone: 'Africa/Cairo' })}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[#2d3e50] truncate">{event.name}</p>
                       <p className="text-sm text-gray-400">
-                        {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long' })}
+                        {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' })}
                       </p>
                     </div>
                     <Link
