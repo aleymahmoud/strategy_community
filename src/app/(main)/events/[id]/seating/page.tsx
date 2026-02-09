@@ -503,11 +503,11 @@ export default function SeatingPage({
           <div
             className="bg-gray-50 border border-gray-200"
             style={{
-              width: event.layout.width + 120,
-              height: event.layout.height + 120,
-              minWidth: event.layout.width + 120,
-              minHeight: event.layout.height + 120,
-              padding: 60,
+              width: event.layout.width + 160,
+              height: event.layout.height + 160,
+              minWidth: event.layout.width + 160,
+              minHeight: event.layout.height + 160,
+              padding: 80,
             }}
           >
             <div className="relative" style={{ width: event.layout.width, height: event.layout.height }}>
