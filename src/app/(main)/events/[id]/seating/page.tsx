@@ -501,14 +501,16 @@ export default function SeatingPage({
         {/* Seating Canvas */}
         <div className="flex-1 bg-white rounded-lg shadow overflow-auto p-4">
           <div
-            className="relative bg-gray-50 border border-gray-200"
+            className="bg-gray-50 border border-gray-200"
             style={{
-              width: event.layout.width,
-              height: event.layout.height,
-              minWidth: event.layout.width,
-              minHeight: event.layout.height,
+              width: event.layout.width + 120,
+              height: event.layout.height + 120,
+              minWidth: event.layout.width + 120,
+              minHeight: event.layout.height + 120,
+              padding: 60,
             }}
           >
+            <div className="relative" style={{ width: event.layout.width, height: event.layout.height }}>
             {event.layout.sections.map((section) => {
               const isVenueElement = [
                 "STAGE",
@@ -634,6 +636,7 @@ export default function SeatingPage({
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       </div>
