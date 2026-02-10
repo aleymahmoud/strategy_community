@@ -281,27 +281,13 @@ export default function AttendancePage({
     ctx.fillText(attendee.member.name, W / 2, 410);
 
     // Event name
-    ctx.fillStyle = "#6b7280";
-    ctx.font = "18px sans-serif";
-    ctx.fillText(eventName, W / 2, 448);
-
-    // Membership badge
-    if (attendee.member.membership) {
-      ctx.fillStyle = "#d4a537";
-      ctx.font = "bold 14px sans-serif";
-      ctx.fillText(attendee.member.membership.replace(/_/g, " "), W / 2, 485);
-    }
+    ctx.fillStyle = "#d4a537";
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText(eventName, W / 2, 450);
 
     // Bottom accent
     ctx.fillStyle = "#2d3e50";
     ctx.fillRect(0, H - 6, W, 6);
-
-    // QR value footer
-    if (attendee.qrCode && !attendee.qrCode.startsWith("http")) {
-      ctx.fillStyle = "#9ca3af";
-      ctx.font = "11px monospace";
-      ctx.fillText(attendee.qrCode, W / 2, H - 20);
-    }
 
     return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"));
   }
