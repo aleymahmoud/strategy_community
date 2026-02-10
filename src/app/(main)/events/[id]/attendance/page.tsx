@@ -42,7 +42,6 @@ export default function AttendancePage({
   const [uploading, setUploading] = useState(false);
   const [editingQR, setEditingQR] = useState<string | null>(null);
   const [qrInput, setQrInput] = useState("");
-  const [qrImageInput, setQrImageInput] = useState("");
   const [scannerEnabled, setScannerEnabled] = useState(false);
   const [scanFeedback, setScanFeedback] = useState<{
     type: "success" | "error";
@@ -131,11 +130,14 @@ export default function AttendancePage({
 
   async function handleSaveQR(attendeeId: string) {
     if (!qrInput.trim()) return;
+    const value = qrInput.trim();
+    const isUrl = value.startsWith("http");
     try {
-      const payload: Record<string, string | null> = { qrCode: qrInput.trim() };
-      if (qrImageInput.trim()) {
-        payload.qrImageUrl = qrImageInput.trim();
-      }
+      // If URL: store as image URL, use attendee ID as scan value
+      // If not URL: store as scan value (branded QR)
+      const payload = isUrl
+        ? { qrCode: attendeeId, qrImageUrl: value }
+        : { qrCode: value, qrImageUrl: null };
       const res = await fetch(`/api/events/${id}/attendees/${attendeeId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -148,7 +150,7 @@ export default function AttendancePage({
             ...prev,
             attendees: prev.attendees.map((a) =>
               a.id === attendeeId
-                ? { ...a, qrCode: qrInput.trim(), qrImageUrl: qrImageInput.trim() || null }
+                ? { ...a, qrCode: isUrl ? attendeeId : value, qrImageUrl: isUrl ? value : null }
                 : a
             ),
           };
@@ -159,7 +161,6 @@ export default function AttendancePage({
     } finally {
       setEditingQR(null);
       setQrInput("");
-      setQrImageInput("");
     }
   }
 
@@ -188,8 +189,8 @@ export default function AttendancePage({
 
   async function downloadQRCode(attendee: Attendee) {
     // If there's a QR image URL, open it directly
-    if (attendee.qrImageUrl) {
-      window.open(attendee.qrImageUrl, "_blank");
+    if (attendee.qrImageUrl || attendee.qrCode?.startsWith("http")) {
+      window.open(attendee.qrImageUrl || attendee.qrCode!, "_blank");
       return;
     }
 
@@ -527,83 +528,68 @@ export default function AttendancePage({
                         </span>
                       </td>
                       <td className="px-3 py-3 text-center">
-                        {attendee.qrCode ? (
-                          attendee.qrImageUrl ? (
-                            <img
-                              src={attendee.qrImageUrl}
-                              alt={`QR - ${attendee.member.name}`}
-                              className="w-14 h-14 object-contain inline-block rounded"
+                        {(attendee.qrImageUrl || attendee.qrCode?.startsWith("http")) ? (
+                          <img
+                            src={attendee.qrImageUrl || attendee.qrCode!}
+                            alt={`QR - ${attendee.member.name}`}
+                            className="w-14 h-14 object-contain inline-block rounded"
+                          />
+                        ) : attendee.qrCode ? (
+                          <div
+                            data-qr-attendee={attendee.id}
+                            className="inline-block"
+                          >
+                            <QRCodeSVG
+                              value={attendee.qrCode}
+                              size={56}
+                              fgColor="#223167"
+                              level="M"
+                              imageSettings={{
+                                src: "/logo-icon.png",
+                                x: undefined,
+                                y: undefined,
+                                height: 14,
+                                width: 14,
+                                excavate: true,
+                              }}
                             />
-                          ) : (
-                            <div
-                              data-qr-attendee={attendee.id}
-                              className="inline-block"
-                            >
-                              <QRCodeSVG
-                                value={attendee.qrCode}
-                                size={56}
-                                fgColor="#223167"
-                                level="M"
-                                imageSettings={{
-                                  src: "/logo-icon.png",
-                                  x: undefined,
-                                  y: undefined,
-                                  height: 14,
-                                  width: 14,
-                                  excavate: true,
-                                }}
-                              />
-                            </div>
-                          )
+                          </div>
                         ) : editingQR === attendee.id ? (
-                          <div className="flex flex-col items-center gap-1">
+                          <div className="flex items-center gap-1 justify-center">
                             <input
                               type="text"
                               value={qrInput}
                               onChange={(e) => setQrInput(e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") handleSaveQR(attendee.id);
-                                if (e.key === "Escape") { setEditingQR(null); setQrInput(""); setQrImageInput(""); }
+                                if (e.key === "Escape") { setEditingQR(null); setQrInput(""); }
                               }}
-                              placeholder="Scan value (required)"
-                              className="w-40 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#d4a537]"
+                              placeholder="QR image URL or value"
+                              className="w-36 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#d4a537]"
                               autoFocus
                             />
-                            <input
-                              type="text"
-                              value={qrImageInput}
-                              onChange={(e) => setQrImageInput(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") handleSaveQR(attendee.id);
-                                if (e.key === "Escape") { setEditingQR(null); setQrInput(""); setQrImageInput(""); }
-                              }}
-                              placeholder="Image URL (optional)"
-                              className="w-40 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#d4a537]"
-                            />
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleSaveQR(attendee.id)}
-                                className="text-green-600 hover:text-green-700"
-                                title="Save"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={() => { setEditingQR(null); setQrInput(""); setQrImageInput(""); }}
-                                className="text-gray-400 hover:text-gray-600"
-                                title="Cancel"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => handleSaveQR(attendee.id)}
+                              className="text-green-600 hover:text-green-700"
+                              title="Save"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => { setEditingQR(null); setQrInput(""); }}
+                              className="text-gray-400 hover:text-gray-600"
+                              title="Cancel"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
                           </div>
                         ) : (
                           <button
-                            onClick={() => { setEditingQR(attendee.id); setQrInput(""); setQrImageInput(""); }}
+                            onClick={() => { setEditingQR(attendee.id); setQrInput(""); }}
                             className="text-xs text-gray-400 hover:text-[#d4a537] transition-colors cursor-pointer"
                             title="Click to add QR code manually"
                           >
