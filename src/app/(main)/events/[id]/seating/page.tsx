@@ -262,6 +262,21 @@ export default function SeatingPage({
         <span className="truncate">
           {assignment ? assignment.member.name : seatLabel.split("-").pop()}
         </span>
+        {assignment && (
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              assignSeat(assignment.id, null);
+            }}
+            className="ml-0.5 flex-shrink-0 w-4 h-4 rounded-full bg-white/30 hover:bg-red-500 text-white/70 hover:text-white flex items-center justify-center transition-colors"
+            title="Remove from seat"
+          >
+            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     );
   }
