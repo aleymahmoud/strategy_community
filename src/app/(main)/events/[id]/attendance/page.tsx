@@ -178,6 +178,12 @@ export default function AttendancePage({
   }
 
   async function downloadQRCode(attendee: Attendee) {
+    // If it's a URL image, open it directly
+    if (attendee.qrCode?.startsWith("http")) {
+      window.open(attendee.qrCode, "_blank");
+      return;
+    }
+
     const svgEl = document.querySelector(
       `[data-qr-attendee="${attendee.id}"] svg`
     );
@@ -513,27 +519,33 @@ export default function AttendancePage({
                       </td>
                       <td className="px-3 py-3 text-center">
                         {attendee.qrCode ? (
-                          <div
-                            data-qr-attendee={attendee.id}
-                            className="inline-block"
-                          >
-                            <QRCodeSVG
-                              value={attendee.qrCode}
-                              size={56}
-                              fgColor="#223167"
-                              level="M"
-                              {...(attendee.qrCode === attendee.id ? {
-                                imageSettings: {
+                          attendee.qrCode.startsWith("http") ? (
+                            <img
+                              src={attendee.qrCode}
+                              alt={`QR - ${attendee.member.name}`}
+                              className="w-14 h-14 object-contain inline-block rounded"
+                            />
+                          ) : (
+                            <div
+                              data-qr-attendee={attendee.id}
+                              className="inline-block"
+                            >
+                              <QRCodeSVG
+                                value={attendee.qrCode}
+                                size={56}
+                                fgColor="#223167"
+                                level="M"
+                                imageSettings={{
                                   src: "/logo-icon.png",
                                   x: undefined,
                                   y: undefined,
                                   height: 14,
                                   width: 14,
                                   excavate: true,
-                                }
-                              } : {})}
-                            />
-                          </div>
+                                }}
+                              />
+                            </div>
+                          )
                         ) : editingQR === attendee.id ? (
                           <div className="flex items-center gap-1 justify-center">
                             <input
