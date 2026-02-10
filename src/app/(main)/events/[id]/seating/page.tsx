@@ -90,6 +90,7 @@ export default function SeatingPage({
     x: number;
     y: number;
   } | null>(null);
+  const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -145,6 +146,15 @@ export default function SeatingPage({
     setDragging((prev) =>
       prev ? { ...prev, x: e.clientX, y: e.clientY } : null
     );
+    // Track hovered section for table highlight
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const seatEl = el?.closest("[data-seat-id]") as HTMLElement | null;
+    if (seatEl) {
+      setHoveredSectionId(null);
+    } else {
+      const sectionEl = el?.closest("[data-section-id]") as HTMLElement | null;
+      setHoveredSectionId(sectionEl?.getAttribute("data-section-id") || null);
+    }
   }, []);
 
   const handlePointerUp = useCallback(
@@ -161,13 +171,32 @@ export default function SeatingPage({
         if (seatId && isEmpty) {
           assignSeat(dragging.attendeeId, seatId);
         }
+      } else {
+        // Check if dropped on a table/section - auto-assign to first empty seat
+        const sectionEl = el?.closest("[data-section-id]") as HTMLElement | null;
+        if (sectionEl && event) {
+          const sectionId = sectionEl.getAttribute("data-section-id");
+          const section = event.layout?.sections.find((s) => s.id === sectionId);
+          if (section) {
+            const occupiedSeatLabels = new Set(
+              event.attendees.filter((a) => a.seatId).map((a) => a.seat?.label)
+            );
+            const emptySeat = section.seats.find(
+              (s) => !occupiedSeatLabels.has(s.label)
+            );
+            if (emptySeat) {
+              assignSeat(dragging.attendeeId, emptySeat.id);
+            }
+          }
+        }
       }
 
       setDragging(null);
       setHoveredSeatLabel(null);
+      setHoveredSectionId(null);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragging]
+    [dragging, event]
   );
 
   useEffect(() => {
@@ -552,7 +581,8 @@ export default function SeatingPage({
                 >
                   {/* Section background */}
                   <div
-                    className={`w-full h-full flex items-center justify-center ${
+                    data-section-id={!isVenueElement ? section.id : undefined}
+                    className={`w-full h-full flex items-center justify-center transition-all ${
                       section.type === "ROUND_TABLE"
                         ? "rounded-full bg-amber-100 border-2 border-amber-400"
                         : section.type === "ROW"
@@ -560,6 +590,10 @@ export default function SeatingPage({
                         : isVenueElement
                         ? "bg-gray-100 border-2 border-gray-300 rounded-lg"
                         : "bg-amber-100 border-2 border-amber-400 rounded-lg"
+                    } ${
+                      !isVenueElement && dragging && hoveredSectionId === section.id
+                        ? "ring-4 ring-purple-400 ring-offset-2 scale-[1.02] border-purple-400"
+                        : ""
                     }`}
                   >
                     <div className="text-center">
