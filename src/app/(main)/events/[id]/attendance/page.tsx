@@ -192,21 +192,6 @@ export default function AttendancePage({
     }
   }
 
-  // Preload logo once for reuse in card rendering
-  const logoDataUrlRef = useRef<string | null>(null);
-  async function getLogoDataUrl(): Promise<string> {
-    if (logoDataUrlRef.current) return logoDataUrlRef.current;
-    const resp = await fetch("/logo-icon.png");
-    const blob = await resp.blob();
-    const dataUrl = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-    logoDataUrlRef.current = dataUrl;
-    return dataUrl;
-  }
-
   // Render a QR pass card as a canvas blob
   async function renderQRCard(attendee: Attendee, eventName: string, eventDate?: string, eventLocation?: string | null): Promise<Blob | null> {
     const W = 500, H = 720;
@@ -242,21 +227,12 @@ export default function AttendancePage({
         ctx.fillText("QR Image", W / 2, 195);
       }
     } else if (attendee.qrCode) {
-      // Render branded QR via hidden SVG → canvas
+      // Render QR via hidden SVG → canvas
       const svgEl = document.querySelector(`[data-qr-attendee="${attendee.id}"] svg`);
       if (svgEl) {
         const cloned = svgEl.cloneNode(true) as SVGSVGElement;
         cloned.setAttribute("width", "280");
         cloned.setAttribute("height", "280");
-        // Convert logo to data URL
-        const images = cloned.querySelectorAll("image");
-        const logoUrl = await getLogoDataUrl();
-        for (const image of images) {
-          const href = image.getAttribute("href") || image.getAttributeNS("http://www.w3.org/1999/xlink", "href");
-          if (href && !href.startsWith("data:")) {
-            image.setAttribute("href", logoUrl);
-          }
-        }
         const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         bg.setAttribute("width", "100%");
         bg.setAttribute("height", "100%");
@@ -720,14 +696,6 @@ export default function AttendancePage({
                               size={56}
                               fgColor="#223167"
                               level="M"
-                              imageSettings={{
-                                src: "/logo-icon.png",
-                                x: undefined,
-                                y: undefined,
-                                height: 14,
-                                width: 14,
-                                excavate: true,
-                              }}
                             />
                           </div>
                         ) : editingQR === attendee.id ? (
