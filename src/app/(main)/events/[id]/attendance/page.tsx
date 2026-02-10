@@ -47,6 +47,7 @@ export default function AttendancePage({
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [unmatchedScan, setUnmatchedScan] = useState<string | null>(null);
   const [recentScans, setRecentScans] = useState<ScanEntry[]>([]);
   const lastScanRef = useRef<{ value: string; time: number }>({
     value: "",
@@ -272,11 +273,11 @@ export default function AttendancePage({
       );
 
       if (!attendee) {
+        setUnmatchedScan(decodedText);
         setScanFeedback({
           type: "error",
-          message: "Unknown QR code - no matching attendee",
+          message: "Unknown QR - assign to an attendee below",
         });
-        setTimeout(() => setScanFeedback(null), 3000);
         return;
       }
 
@@ -339,6 +340,49 @@ export default function AttendancePage({
     },
     [event, id]
   );
+
+  async function handleAssignScan(attendeeId: string) {
+    if (!unmatchedScan || !event) return;
+    try {
+      const res = await fetch(`/api/events/${id}/attendees/${attendeeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrCode: unmatchedScan, status: "ATTENDED" }),
+      });
+      if (res.ok) {
+        const attendee = event.attendees.find((a) => a.id === attendeeId);
+        setEvent((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            attendees: prev.attendees.map((a) =>
+              a.id === attendeeId ? { ...a, qrCode: unmatchedScan, status: "ATTENDED" } : a
+            ),
+          };
+        });
+        const timeStr = new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Africa/Cairo",
+        });
+        if (attendee) {
+          setRecentScans((prev) => [
+            { name: attendee.member.name, time: timeStr },
+            ...prev.slice(0, 19),
+          ]);
+        }
+        setScanFeedback({
+          type: "success",
+          message: `${attendee?.member.name} linked & checked in!`,
+        });
+        setTimeout(() => setScanFeedback(null), 3000);
+      }
+    } catch (error) {
+      console.error("Failed to assign scan:", error);
+    } finally {
+      setUnmatchedScan(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -712,6 +756,35 @@ export default function AttendancePage({
                 }`}
               >
                 {scanFeedback.message}
+              </div>
+            )}
+
+            {/* Assign unknown QR to attendee */}
+            {unmatchedScan && event && (
+              <div className="mt-3 border border-amber-200 rounded-lg bg-amber-50 p-3">
+                <p className="text-xs text-amber-700 mb-2 font-medium">
+                  Scanned: <span className="font-mono break-all">{unmatchedScan}</span>
+                </p>
+                <p className="text-xs text-amber-600 mb-2">Select attendee to link this QR:</p>
+                <div className="max-h-[180px] overflow-y-auto space-y-1">
+                  {event.attendees
+                    .filter((a) => a.status !== "ATTENDED")
+                    .map((a) => (
+                      <button
+                        key={a.id}
+                        onClick={() => handleAssignScan(a.id)}
+                        className="w-full text-left px-3 py-1.5 text-xs rounded hover:bg-amber-100 transition-colors text-[#2d3e50] truncate"
+                      >
+                        {a.member.name}
+                      </button>
+                    ))}
+                </div>
+                <button
+                  onClick={() => { setUnmatchedScan(null); setScanFeedback(null); }}
+                  className="mt-2 w-full text-xs text-gray-400 hover:text-gray-600"
+                >
+                  Dismiss
+                </button>
               </div>
             )}
           </div>
