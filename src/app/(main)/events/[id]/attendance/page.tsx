@@ -39,6 +39,8 @@ export default function AttendancePage({
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingQR, setEditingQR] = useState<string | null>(null);
+  const [qrInput, setQrInput] = useState("");
   const [scannerEnabled, setScannerEnabled] = useState(false);
   const [scanFeedback, setScanFeedback] = useState<{
     type: "success" | "error";
@@ -102,6 +104,33 @@ export default function AttendancePage({
     }
   }
 
+  async function handleSaveQR(attendeeId: string) {
+    if (!qrInput.trim()) return;
+    try {
+      const res = await fetch(`/api/events/${id}/attendees/${attendeeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrCode: qrInput.trim() }),
+      });
+      if (res.ok) {
+        setEvent((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            attendees: prev.attendees.map((a) =>
+              a.id === attendeeId ? { ...a, qrCode: qrInput.trim() } : a
+            ),
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save QR code:", error);
+    } finally {
+      setEditingQR(null);
+      setQrInput("");
+    }
+  }
+
   async function handleDownloadTemplate() {
     window.open(`/api/events/${id}/attendees/qr-template`, "_blank");
   }
@@ -125,7 +154,7 @@ export default function AttendancePage({
     }
   }
 
-  function downloadQRCode(attendee: Attendee) {
+  async function downloadQRCode(attendee: Attendee) {
     const svgEl = document.querySelector(
       `[data-qr-attendee="${attendee.id}"] svg`
     );
@@ -134,6 +163,24 @@ export default function AttendancePage({
     const clonedSvg = svgEl.cloneNode(true) as SVGSVGElement;
     clonedSvg.setAttribute("width", "400");
     clonedSvg.setAttribute("height", "400");
+
+    // Convert embedded logo to data URL so it survives SVG serialization
+    const images = clonedSvg.querySelectorAll("image");
+    for (const image of images) {
+      const href = image.getAttribute("href") || image.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+      if (href && !href.startsWith("data:")) {
+        try {
+          const resp = await fetch(href);
+          const blob = await resp.blob();
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          image.setAttribute("href", dataUrl);
+        } catch { /* skip if fetch fails */ }
+      }
+    }
 
     const rect = document.createElementNS(
       "http://www.w3.org/2000/svg",
@@ -451,12 +498,58 @@ export default function AttendancePage({
                               value={attendee.qrCode}
                               size={56}
                               fgColor="#223167"
+                              level="M"
+                              imageSettings={{
+                                src: "/logo-icon.png",
+                                x: undefined,
+                                y: undefined,
+                                height: 14,
+                                width: 14,
+                                excavate: true,
+                              }}
                             />
                           </div>
+                        ) : editingQR === attendee.id ? (
+                          <div className="flex items-center gap-1 justify-center">
+                            <input
+                              type="text"
+                              value={qrInput}
+                              onChange={(e) => setQrInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleSaveQR(attendee.id);
+                                if (e.key === "Escape") { setEditingQR(null); setQrInput(""); }
+                              }}
+                              placeholder="QR value or URL"
+                              className="w-32 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#d4a537]"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => handleSaveQR(attendee.id)}
+                              className="text-green-600 hover:text-green-700"
+                              title="Save"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => { setEditingQR(null); setQrInput(""); }}
+                              className="text-gray-400 hover:text-gray-600"
+                              title="Cancel"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
                         ) : (
-                          <span className="text-xs text-gray-400">
-                            No QR
-                          </span>
+                          <button
+                            onClick={() => { setEditingQR(attendee.id); setQrInput(""); }}
+                            className="text-xs text-gray-400 hover:text-[#d4a537] transition-colors cursor-pointer"
+                            title="Click to add QR code manually"
+                          >
+                            No QR <span className="text-[10px]">+ Add</span>
+                          </button>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
