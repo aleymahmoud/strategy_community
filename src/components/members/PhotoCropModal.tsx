@@ -9,7 +9,7 @@ interface PhotoCropModalProps {
   onCancel: () => void;
 }
 
-async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<string> {
+async function getCroppedImg(imageSrc: string, pixelCrop: Area, grayscale: boolean): Promise<string> {
   const image = new Image();
   image.src = imageSrc;
   await new Promise((resolve) => { image.onload = resolve; });
@@ -18,6 +18,10 @@ async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<string>
   canvas.width = 400;
   canvas.height = 400;
   const ctx = canvas.getContext("2d")!;
+
+  if (grayscale) {
+    ctx.filter = "grayscale(100%)";
+  }
 
   ctx.drawImage(
     image,
@@ -39,6 +43,7 @@ export default function PhotoCropModal({ imageSrc, onConfirm, onCancel }: PhotoC
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [saving, setSaving] = useState(false);
+  const [grayscale, setGrayscale] = useState(false);
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels);
@@ -48,7 +53,7 @@ export default function PhotoCropModal({ imageSrc, onConfirm, onCancel }: PhotoC
     if (!croppedAreaPixels) return;
     setSaving(true);
     try {
-      const croppedBase64 = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const croppedBase64 = await getCroppedImg(imageSrc, croppedAreaPixels, grayscale);
       onConfirm(croppedBase64);
     } catch (err) {
       console.error("Failed to crop image:", err);
@@ -67,7 +72,7 @@ export default function PhotoCropModal({ imageSrc, onConfirm, onCancel }: PhotoC
         </div>
 
         {/* Crop Area */}
-        <div className="relative bg-gray-900" style={{ height: 320 }}>
+        <div className="relative bg-gray-900" style={{ height: 320, filter: grayscale ? "grayscale(100%)" : "none" }}>
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -101,6 +106,24 @@ export default function PhotoCropModal({ imageSrc, onConfirm, onCancel }: PhotoC
             </svg>
           </div>
           <p className="text-center text-xs text-gray-400 mt-1">{Math.round(zoom * 100)}%</p>
+        </div>
+
+        {/* Grayscale Toggle */}
+        <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+          <span className="text-sm text-gray-600">Black & White</span>
+          <button
+            type="button"
+            onClick={() => setGrayscale(!grayscale)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              grayscale ? "bg-purple-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                grayscale ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
         </div>
 
         {/* Actions */}
