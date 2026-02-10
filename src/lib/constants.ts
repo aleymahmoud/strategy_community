@@ -1,9 +1,9 @@
 // Membership colors used across the app
 export const membershipColors: Record<string, { bg: string; text: string }> = {
-  FREQUENT: { bg: "bg-green-100", text: "text-green-700" },
-  NON_FREQUENT: { bg: "bg-gray-100", text: "text-gray-700" },
-  NEW: { bg: "bg-blue-100", text: "text-blue-700" },
-  POTENTIAL: { bg: "bg-purple-100", text: "text-purple-700" },
+  FREQUENT: { bg: "bg-blue-500", text: "text-white" },
+  NON_FREQUENT: { bg: "bg-blue-200", text: "text-blue-800" },
+  NEW: { bg: "bg-sky-200", text: "text-sky-800" },
+  POTENTIAL: { bg: "bg-white border border-blue-400", text: "text-blue-600" },
 };
 
 export const guestStatusColors: Record<string, { bg: string; text: string }> = {
