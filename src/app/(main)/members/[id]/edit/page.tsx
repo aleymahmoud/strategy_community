@@ -103,9 +103,7 @@ export default function EditMemberPage({
   }
 
   function handleEditPhoto() {
-    if (originalImageSrc) {
-      setCropImageSrc(originalImageSrc);
-    }
+    setCropImageSrc(originalImageSrc || photoPreview);
   }
 
   useEffect(() => {
@@ -258,7 +256,7 @@ export default function EditMemberPage({
                   >
                     {photoPreview ? "Change Photo" : "Upload Photo"}
                   </label>
-                  {photoPreview && originalImageSrc && (
+                  {photoPreview && (
                     <button
                       type="button"
                       onClick={handleEditPhoto}

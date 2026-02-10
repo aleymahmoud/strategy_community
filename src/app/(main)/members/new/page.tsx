@@ -76,9 +76,7 @@ export default function NewMemberPage() {
   }
 
   function handleEditPhoto() {
-    if (originalImageSrc) {
-      setCropImageSrc(originalImageSrc);
-    }
+    setCropImageSrc(originalImageSrc || photoPreview);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -198,7 +196,7 @@ export default function NewMemberPage() {
                 >
                   Upload Photo
                 </label>
-                {photoPreview && originalImageSrc && (
+                {photoPreview && (
                   <button
                     type="button"
                     onClick={handleEditPhoto}
