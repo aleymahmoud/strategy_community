@@ -61,6 +61,7 @@ export default function EventAttendees({
   const [activeTab, setActiveTab] = useState<"invitations" | "attendees">(
     "invitations"
   );
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   // Local comments state for editing
   const [editingComments, setEditingComments] = useState<
     Record<string, string>
@@ -265,18 +266,30 @@ export default function EventAttendees({
   function renderTrackerCard(
     label: string,
     count: number,
-    colorClass: string
+    colorClass: string,
+    statusKey: string | null = null
   ) {
+    const isActive = statusKey !== null && statusFilter === statusKey;
     return (
-      <div
+      <button
         key={label}
-        className={`rounded-lg px-4 py-2 text-center min-w-[90px] ${colorClass}`}
+        onClick={() => {
+          if (statusKey === null) return;
+          setStatusFilter(isActive ? null : statusKey);
+        }}
+        className={`rounded-lg px-4 py-2 text-center min-w-[90px] transition-all ${colorClass} ${
+          statusKey !== null ? "cursor-pointer hover:shadow-md" : ""
+        } ${
+          isActive
+            ? "ring-2 ring-offset-1 ring-current scale-105 shadow-md"
+            : ""
+        }`}
       >
         <div className="text-lg font-bold">{count}</div>
         <div className="text-[10px] font-semibold uppercase tracking-wide">
           {label}
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -311,7 +324,15 @@ export default function EventAttendees({
     );
   }
 
-  const currentList = activeTab === "invitations" ? invitationList : confirmedList;
+  const baseList = activeTab === "invitations" ? invitationList : confirmedList;
+  const currentList = statusFilter
+    ? baseList.filter((a) => {
+        if (statusFilter === "TOTAL_CONFIRMED") {
+          return a.status === "CONFIRMED" || a.status === "ATTENDED";
+        }
+        return a.status === statusFilter;
+      })
+    : baseList;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -320,7 +341,7 @@ export default function EventAttendees({
         {/* Tabs */}
         <div className="flex border-b border-gray-100">
           <button
-            onClick={() => setActiveTab("invitations")}
+            onClick={() => { setActiveTab("invitations"); setStatusFilter(null); }}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === "invitations"
                 ? "border-b-2 border-[#d4a537] text-[#2d3e50] bg-white"
@@ -333,7 +354,7 @@ export default function EventAttendees({
             </span>
           </button>
           <button
-            onClick={() => setActiveTab("attendees")}
+            onClick={() => { setActiveTab("attendees"); setStatusFilter(null); }}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === "attendees"
                 ? "border-b-2 border-[#d4a537] text-[#2d3e50] bg-white"
@@ -352,16 +373,16 @@ export default function EventAttendees({
           <div className="flex gap-3 flex-wrap">
             {activeTab === "invitations" ? (
               <>
-                {renderTrackerCard("Invited", counts.invited, "bg-gray-100 text-gray-700")}
-                {renderTrackerCard("Confirmed", counts.confirmed, "bg-blue-100 text-blue-700")}
-                {renderTrackerCard("Declined", counts.declined, "bg-red-100 text-red-700")}
-                {renderTrackerCard("Tentative", counts.tentative, "bg-orange-100 text-orange-700")}
+                {renderTrackerCard("Invited", counts.invited, "bg-gray-100 text-gray-700", "INVITED")}
+                {renderTrackerCard("Confirmed", counts.confirmed, "bg-blue-100 text-blue-700", "CONFIRMED")}
+                {renderTrackerCard("Declined", counts.declined, "bg-red-100 text-red-700", "DECLINED")}
+                {renderTrackerCard("Tentative", counts.tentative, "bg-orange-100 text-orange-700", "TENTATIVE")}
               </>
             ) : (
               <>
-                {renderTrackerCard("Total Confirmed", totalConfirmed, "bg-blue-100 text-blue-700")}
-                {renderTrackerCard("Attended", counts.attended, "bg-green-100 text-green-700")}
-                {renderTrackerCard("Absent", counts.absent, "bg-yellow-100 text-yellow-700")}
+                {renderTrackerCard("Total Confirmed", totalConfirmed, "bg-blue-100 text-blue-700", "TOTAL_CONFIRMED")}
+                {renderTrackerCard("Attended", counts.attended, "bg-green-100 text-green-700", "ATTENDED")}
+                {renderTrackerCard("Absent", counts.absent, "bg-yellow-100 text-yellow-700", "ABSENT")}
               </>
             )}
           </div>

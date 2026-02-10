@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const { attendeeId } = await params;
     const body = await request.json();
-    const { seatId, status, whatsapp, followUp, introCall, comments } = body;
+    const { seatId, status, whatsapp, followUp, introCall, comments, qrCode } = body;
 
     const updateData: Record<string, unknown> = {};
     if (seatId !== undefined) updateData.seatId = seatId;
@@ -17,6 +17,7 @@ export async function PUT(
     if (followUp !== undefined) updateData.followUp = followUp;
     if (introCall !== undefined) updateData.introCall = introCall;
     if (comments !== undefined) updateData.comments = comments;
+    if (qrCode !== undefined) updateData.qrCode = qrCode;
 
     const attendee = await prisma.eventAttendee.update({
       where: { id: attendeeId },

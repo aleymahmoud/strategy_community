@@ -87,6 +87,7 @@ model EventAttendee {
   followUp  Boolean @default(false)
   introCall Boolean @default(false)
   comments  String?
+  qrCode    String?
   createdAt DateTime @default(now())
 
   member    Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
