@@ -27,6 +27,7 @@ model Member {
   company         String?
   contact         String?
   memberType      MemberType?
+  guestStatus     GuestStatus?
   photo           String?          // URL or path to member photo
 
   createdAt       DateTime         @default(now())
@@ -36,11 +37,16 @@ model Member {
 }
 
 enum MembershipType {
-  PREMIUM
-  GUEST
-  CORE_MEMBER
-  FREQUENT_GUEST
-  GRAY
+  FREQUENT
+  NON_FREQUENT
+  NEW
+  POTENTIAL
+}
+
+enum GuestStatus {
+  MEMBER
+  DROPPED_GUEST
+  POTENTIAL_PREMIUM_GUEST
   POTENTIAL_GUEST
 }
 

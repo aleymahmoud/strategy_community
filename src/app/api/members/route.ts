@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     const membership = searchParams.get("membership");
     const memberType = searchParams.get("memberType");
     const experience = searchParams.get("experience");
+    const guestStatus = searchParams.get("guestStatus");
 
     // Build where clause
     const where: Record<string, unknown> = {};
@@ -40,6 +41,10 @@ export async function GET(request: NextRequest) {
 
     if (experience) {
       where.experience = experience;
+    }
+
+    if (guestStatus) {
+      where.guestStatus = guestStatus;
     }
 
     // Get total count for pagination
@@ -89,6 +94,7 @@ export async function POST(request: NextRequest) {
       company,
       contact,
       memberType,
+      guestStatus,
       photo,
     } = body;
 
@@ -115,6 +121,7 @@ export async function POST(request: NextRequest) {
         company: company?.trim() || null,
         contact: contact?.trim() || null,
         memberType: memberType || null,
+        guestStatus: guestStatus || null,
         photo: photo || null,
       },
     });

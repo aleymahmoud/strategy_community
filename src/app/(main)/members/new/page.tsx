@@ -3,14 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import PhotoCropModal from "@/components/members/PhotoCropModal";
 
 const MEMBERSHIP_OPTIONS = [
   { value: "", label: "Select Membership" },
-  { value: "PREMIUM", label: "Premium" },
-  { value: "GUEST", label: "Guest" },
-  { value: "CORE_MEMBER", label: "Core Member" },
-  { value: "FREQUENT_GUEST", label: "Frequent Guest" },
-  { value: "GRAY", label: "Gray" },
+  { value: "FREQUENT", label: "Frequent" },
+  { value: "NON_FREQUENT", label: "Non Frequent" },
+  { value: "NEW", label: "New" },
+  { value: "POTENTIAL", label: "Potential" },
+];
+
+const GUEST_STATUS_OPTIONS = [
+  { value: "", label: "Select Guest Status" },
+  { value: "MEMBER", label: "Member" },
+  { value: "DROPPED_GUEST", label: "Dropped Guest" },
+  { value: "POTENTIAL_PREMIUM_GUEST", label: "Potential Premium Guest" },
   { value: "POTENTIAL_GUEST", label: "Potential Guest" },
 ];
 
@@ -42,17 +49,35 @@ export default function NewMemberPage() {
   const [error, setError] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setPhotoPreview(base64);
-        setPhotoBase64(base64);
+        const raw = reader.result as string;
+        setOriginalImageSrc(raw);
+        setCropImageSrc(raw);
       };
       reader.readAsDataURL(file);
+    }
+  }
+
+  function handleCropConfirm(croppedBase64: string) {
+    setPhotoPreview(croppedBase64);
+    setPhotoBase64(croppedBase64);
+    setCropImageSrc(null);
+  }
+
+  function handleCropCancel() {
+    setCropImageSrc(null);
+  }
+
+  function handleEditPhoto() {
+    if (originalImageSrc) {
+      setCropImageSrc(originalImageSrc);
     }
   }
 
@@ -77,6 +102,7 @@ export default function NewMemberPage() {
       company: formData.get("company") as string || null,
       contact: formData.get("contact") as string || null,
       memberType: formData.get("memberType") as string || null,
+      guestStatus: formData.get("guestStatus") as string || null,
       photo: photoBase64,
     };
 
@@ -172,10 +198,19 @@ export default function NewMemberPage() {
                 >
                   Upload Photo
                 </label>
+                {photoPreview && originalImageSrc && (
+                  <button
+                    type="button"
+                    onClick={handleEditPhoto}
+                    className="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Edit Photo
+                  </button>
+                )}
                 {photoPreview && (
                   <button
                     type="button"
-                    onClick={() => { setPhotoPreview(null); setPhotoBase64(null); }}
+                    onClick={() => { setPhotoPreview(null); setPhotoBase64(null); setOriginalImageSrc(null); }}
                     className="mt-2 text-sm text-red-500 hover:text-red-600"
                   >
                     Remove
@@ -242,6 +277,19 @@ export default function NewMemberPage() {
                       <option value="1">1 - Basic</option>
                       <option value="2">2 - Intermediate</option>
                       <option value="3">3 - Advanced</option>
+                    </select>
+                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="guestStatus" className={labelClass}>Guest Status</label>
+                  <div className="relative">
+                    <select id="guestStatus" name="guestStatus" className={selectClass}>
+                      {GUEST_STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                     <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -380,6 +428,15 @@ export default function NewMemberPage() {
           </div>
         </div>
       </form>
+
+      {/* Photo Crop Modal */}
+      {cropImageSrc && (
+        <PhotoCropModal
+          imageSrc={cropImageSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }

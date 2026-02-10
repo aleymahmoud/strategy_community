@@ -7,11 +7,17 @@ import PhotoCropModal from "@/components/members/PhotoCropModal";
 
 const MEMBERSHIP_OPTIONS = [
   { value: "", label: "Select Membership" },
-  { value: "PREMIUM", label: "Premium" },
-  { value: "GUEST", label: "Guest" },
-  { value: "CORE_MEMBER", label: "Core Member" },
-  { value: "FREQUENT_GUEST", label: "Frequent Guest" },
-  { value: "GRAY", label: "Gray" },
+  { value: "FREQUENT", label: "Frequent" },
+  { value: "NON_FREQUENT", label: "Non Frequent" },
+  { value: "NEW", label: "New" },
+  { value: "POTENTIAL", label: "Potential" },
+];
+
+const GUEST_STATUS_OPTIONS = [
+  { value: "", label: "Select Guest Status" },
+  { value: "MEMBER", label: "Member" },
+  { value: "DROPPED_GUEST", label: "Dropped Guest" },
+  { value: "POTENTIAL_PREMIUM_GUEST", label: "Potential Premium Guest" },
   { value: "POTENTIAL_GUEST", label: "Potential Guest" },
 ];
 
@@ -53,6 +59,7 @@ interface Member {
   company: string | null;
   contact: string | null;
   memberType: string | null;
+  guestStatus: string | null;
   photo: string | null;
 }
 
@@ -70,13 +77,16 @@ export default function EditMemberPage({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCropImageSrc(reader.result as string);
+        const raw = reader.result as string;
+        setOriginalImageSrc(raw);
+        setCropImageSrc(raw);
       };
       reader.readAsDataURL(file);
     }
@@ -90,6 +100,12 @@ export default function EditMemberPage({
 
   function handleCropCancel() {
     setCropImageSrc(null);
+  }
+
+  function handleEditPhoto() {
+    if (originalImageSrc) {
+      setCropImageSrc(originalImageSrc);
+    }
   }
 
   useEffect(() => {
@@ -133,6 +149,7 @@ export default function EditMemberPage({
       company: formData.get("company") as string || null,
       contact: formData.get("contact") as string || null,
       memberType: formData.get("memberType") as string || null,
+      guestStatus: formData.get("guestStatus") as string || null,
       photo: photoBase64,
     };
 
@@ -241,10 +258,19 @@ export default function EditMemberPage({
                   >
                     {photoPreview ? "Change Photo" : "Upload Photo"}
                   </label>
+                  {photoPreview && originalImageSrc && (
+                    <button
+                      type="button"
+                      onClick={handleEditPhoto}
+                      className="ml-2 text-sm text-purple-600 hover:text-purple-800"
+                    >
+                      Edit
+                    </button>
+                  )}
                   {photoPreview && (
                     <button
                       type="button"
-                      onClick={() => { setPhotoPreview(null); setPhotoBase64(null); }}
+                      onClick={() => { setPhotoPreview(null); setPhotoBase64(null); setOriginalImageSrc(null); }}
                       className="ml-2 text-sm text-red-600 hover:text-red-800"
                     >
                       Remove
@@ -456,6 +482,24 @@ export default function EditMemberPage({
                 <option value="1">1 - Basic</option>
                 <option value="2">2 - Intermediate</option>
                 <option value="3">3 - Advanced</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="guestStatus" className="block text-sm font-medium text-gray-700 mb-1">
+                Guest Status
+              </label>
+              <select
+                id="guestStatus"
+                name="guestStatus"
+                defaultValue={member.guestStatus || ""}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                {GUEST_STATUS_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

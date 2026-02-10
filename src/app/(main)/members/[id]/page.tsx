@@ -3,16 +3,15 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import DeleteMemberButton from "@/components/members/DeleteMemberButton";
 import MemberProfileNav from "@/components/members/MemberProfileNav";
+import { formatMembership, formatGuestStatus, membershipColors, guestStatusColors, calculateMemberScore, classifyMemberScore } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 const MEMBERSHIP_LABELS: Record<string, string> = {
-  PREMIUM: "Premium",
-  GUEST: "Guest",
-  CORE_MEMBER: "Core Member",
-  FREQUENT_GUEST: "Frequent Guest",
-  GRAY: "Gray",
-  POTENTIAL_GUEST: "Potential Guest",
+  FREQUENT: "Frequent",
+  NON_FREQUENT: "Non Frequent",
+  NEW: "New",
+  POTENTIAL: "Potential",
 };
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -35,12 +34,10 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const MEMBERSHIP_COLORS: Record<string, string> = {
-  PREMIUM: "bg-purple-100 text-purple-700",
-  GUEST: "bg-gray-100 text-gray-700",
-  CORE_MEMBER: "bg-blue-100 text-blue-700",
-  FREQUENT_GUEST: "bg-green-100 text-green-700",
-  GRAY: "bg-gray-200 text-gray-600",
-  POTENTIAL_GUEST: "bg-yellow-100 text-yellow-700",
+  FREQUENT: "bg-green-100 text-green-700",
+  NON_FREQUENT: "bg-gray-100 text-gray-700",
+  NEW: "bg-blue-100 text-blue-700",
+  POTENTIAL: "bg-purple-100 text-purple-700",
 };
 
 async function getMember(id: string) {
@@ -96,6 +93,11 @@ export default async function MemberDetailPage({
         {member.membership && (
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${MEMBERSHIP_COLORS[member.membership] || "bg-gray-100"}`}>
             {MEMBERSHIP_LABELS[member.membership] || member.membership}
+          </span>
+        )}
+        {member.guestStatus && (
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${guestStatusColors[member.guestStatus]?.bg || "bg-gray-100"} ${guestStatusColors[member.guestStatus]?.text || "text-gray-700"}`}>
+            {formatGuestStatus(member.guestStatus)}
           </span>
         )}
         <MemberProfileNav
@@ -188,6 +190,25 @@ export default async function MemberDetailPage({
               <div>
                 <label className="text-sm text-gray-500">Management Level</label>
                 <p className="text-gray-800">{member.managementLevel || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Guest Status</label>
+                <p className="text-gray-800">
+                  {member.guestStatus ? formatGuestStatus(member.guestStatus) : "-"}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Score</label>
+                {(() => {
+                  const score = calculateMemberScore(member);
+                  if (score === null) return <p className="text-gray-800">-</p>;
+                  const classification = classifyMemberScore(score);
+                  return (
+                    <p className={`font-medium ${classification.color}`}>
+                      {score} · {classification.label}
+                    </p>
+                  );
+                })()}
               </div>
             </div>
           </div>

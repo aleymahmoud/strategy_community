@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { membershipColors, formatMembership } from '@/lib/constants';
+import { membershipColors, formatMembership, guestStatusColors, formatGuestStatus, calculateMemberScore, classifyMemberScore } from '@/lib/constants';
 
 interface Member {
   id: string;
@@ -21,6 +21,7 @@ interface Member {
   company: string | null;
   contact: string | null;
   memberType: string | null;
+  guestStatus: string | null;
   photo: string | null;
   joinDate: string;
   createdAt: string;
@@ -36,12 +37,18 @@ interface Pagination {
 
 const MEMBERSHIP_OPTIONS = [
   { value: '', label: 'All Memberships' },
-  { value: 'PREMIUM', label: 'Premium' },
-  { value: 'CORE_MEMBER', label: 'Core Member' },
-  { value: 'FREQUENT_GUEST', label: 'Frequent Guest' },
-  { value: 'GUEST', label: 'Guest' },
+  { value: 'FREQUENT', label: 'Frequent' },
+  { value: 'NON_FREQUENT', label: 'Non Frequent' },
+  { value: 'NEW', label: 'New' },
+  { value: 'POTENTIAL', label: 'Potential' },
+];
+
+const GUEST_STATUS_OPTIONS = [
+  { value: '', label: 'All Guest Status' },
+  { value: 'MEMBER', label: 'Member' },
+  { value: 'DROPPED_GUEST', label: 'Dropped Guest' },
+  { value: 'POTENTIAL_PREMIUM_GUEST', label: 'Potential Premium Guest' },
   { value: 'POTENTIAL_GUEST', label: 'Potential Guest' },
-  { value: 'GRAY', label: 'Gray' },
 ];
 
 const MEMBER_TYPE_OPTIONS = [
@@ -78,6 +85,7 @@ export default function MembersPage() {
   const [membership, setMembership] = useState('');
   const [memberType, setMemberType] = useState('');
   const [experience, setExperience] = useState('');
+  const [guestStatus, setGuestStatus] = useState('');
 
   // Handle selecting a member and showing profile on mobile
   const handleSelectMember = (member: Member) => {
@@ -99,6 +107,7 @@ export default function MembersPage() {
       if (membership) params.set('membership', membership);
       if (memberType) params.set('memberType', memberType);
       if (experience) params.set('experience', experience);
+      if (guestStatus) params.set('guestStatus', guestStatus);
 
       const res = await fetch(`/api/members?${params}`);
       const data = await res.json();
@@ -115,7 +124,7 @@ export default function MembersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, membership, memberType, experience]);
+  }, [pagination.page, pagination.limit, search, membership, memberType, experience, guestStatus]);
 
   useEffect(() => {
     fetchMembers();
@@ -243,13 +252,29 @@ export default function MembersPage() {
               ))}
             </select>
 
-            {(search || membership || memberType || experience) && (
+            <select
+              value={guestStatus}
+              onChange={(e) => {
+                setGuestStatus(e.target.value);
+                handleFilterChange();
+              }}
+              className="flex-1 lg:flex-none px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#d4a537] bg-white lg:min-w-[160px]"
+            >
+              {GUEST_STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+
+            {(search || membership || memberType || experience || guestStatus) && (
               <button
                 onClick={() => {
                   setSearch('');
                   setMembership('');
                   setMemberType('');
                   setExperience('');
+                  setGuestStatus('');
                   handleFilterChange();
                 }}
                 className="px-3 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -298,11 +323,18 @@ export default function MembersPage() {
                   <h2 className="text-lg font-semibold text-[#2d3e50] truncate">{selectedMember.name}</h2>
                   <p className="text-sm text-gray-500 truncate">{selectedMember.title || 'No title'}</p>
                   {selectedMember.company && <p className="text-xs text-gray-400 truncate">{selectedMember.company}</p>}
-                  {selectedMember.membership && (
-                    <span className={`inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded ${membershipColors[selectedMember.membership]?.bg || 'bg-gray-100'} ${membershipColors[selectedMember.membership]?.text || 'text-gray-700'}`}>
-                      {formatMembership(selectedMember.membership)}
-                    </span>
-                  )}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {selectedMember.membership && (
+                      <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${membershipColors[selectedMember.membership]?.bg || 'bg-gray-100'} ${membershipColors[selectedMember.membership]?.text || 'text-gray-700'}`}>
+                        {formatMembership(selectedMember.membership)}
+                      </span>
+                    )}
+                    {selectedMember.guestStatus && (
+                      <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${guestStatusColors[selectedMember.guestStatus]?.bg || 'bg-gray-100'} ${guestStatusColors[selectedMember.guestStatus]?.text || 'text-gray-700'}`}>
+                        {formatGuestStatus(selectedMember.guestStatus)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -413,7 +445,7 @@ export default function MembersPage() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-medium text-[#2d3e50] truncate">{member.name}</h3>
                           {member.membership && (
                             <span
@@ -424,6 +456,25 @@ export default function MembersPage() {
                               {formatMembership(member.membership)}
                             </span>
                           )}
+                          {member.guestStatus && (
+                            <span
+                              className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                                guestStatusColors[member.guestStatus]?.bg || 'bg-gray-100'
+                              } ${guestStatusColors[member.guestStatus]?.text || 'text-gray-700'}`}
+                            >
+                              {formatGuestStatus(member.guestStatus)}
+                            </span>
+                          )}
+                          {(() => {
+                            const score = calculateMemberScore(member);
+                            if (score === null) return null;
+                            const classification = classifyMemberScore(score);
+                            return (
+                              <span className={`px-2 py-0.5 text-xs font-medium ${classification.color}`}>
+                                {score} · {classification.label}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <p className="text-sm text-gray-600 truncate">
                           {member.title || 'No title'}
@@ -537,11 +588,18 @@ export default function MembersPage() {
                     {selectedMember.company && (
                       <p className="text-xs text-gray-400 truncate mt-0.5">{selectedMember.company}</p>
                     )}
-                    {selectedMember.membership && (
-                      <span className={`inline-block mt-2 px-2 py-0.5 text-[10px] font-medium rounded w-fit ${membershipColors[selectedMember.membership]?.bg || 'bg-gray-100'} ${membershipColors[selectedMember.membership]?.text || 'text-gray-700'}`}>
-                        {formatMembership(selectedMember.membership)}
-                      </span>
-                    )}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedMember.membership && (
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded w-fit ${membershipColors[selectedMember.membership]?.bg || 'bg-gray-100'} ${membershipColors[selectedMember.membership]?.text || 'text-gray-700'}`}>
+                          {formatMembership(selectedMember.membership)}
+                        </span>
+                      )}
+                      {selectedMember.guestStatus && (
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded w-fit ${guestStatusColors[selectedMember.guestStatus]?.bg || 'bg-gray-100'} ${guestStatusColors[selectedMember.guestStatus]?.text || 'text-gray-700'}`}>
+                          {formatGuestStatus(selectedMember.guestStatus)}
+                        </span>
+                      )}
+                    </div>
                     {/* Edit Button */}
                     <Link
                       href={`/members/${selectedMember.id}/edit`}
@@ -614,6 +672,19 @@ export default function MembersPage() {
                         {new Date(selectedMember.joinDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                       </p>
                     </div>
+                    {(() => {
+                      const score = calculateMemberScore(selectedMember);
+                      if (score === null) return null;
+                      const classification = classifyMemberScore(score);
+                      return (
+                        <div className="bg-gray-50 rounded p-2">
+                          <p className="text-[10px] text-gray-400">Score</p>
+                          <p className={`text-xs font-medium ${classification.color}`}>
+                            {score} · {classification.label}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 

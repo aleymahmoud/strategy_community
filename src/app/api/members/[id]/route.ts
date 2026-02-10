@@ -50,6 +50,7 @@ export async function PUT(
       company,
       contact,
       memberType,
+      guestStatus,
       photo,
     } = body;
 
@@ -77,6 +78,7 @@ export async function PUT(
         company: company?.trim() || null,
         contact: contact?.trim() || null,
         memberType: memberType || null,
+        guestStatus: guestStatus || null,
         photo: photo || null,
       },
     });
