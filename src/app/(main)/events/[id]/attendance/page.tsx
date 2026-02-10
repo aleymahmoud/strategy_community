@@ -5,6 +5,7 @@ import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { statusColors } from "@/lib/constants";
 import QRScanner from "@/components/events/QRScanner";
+import JSZip from "jszip";
 
 interface Attendee {
   id: string;
@@ -40,6 +41,7 @@ export default function AttendancePage({
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [editingQR, setEditingQR] = useState<string | null>(null);
   const [qrInput, setQrInput] = useState("");
   const [scannerEnabled, setScannerEnabled] = useState(false);
@@ -188,69 +190,170 @@ export default function AttendancePage({
     }
   }
 
-  async function downloadQRCode(attendee: Attendee) {
-    // If there's a QR image URL, open it directly
-    if (attendee.qrImageUrl || attendee.qrCode?.startsWith("http")) {
-      window.open(attendee.qrImageUrl || attendee.qrCode!, "_blank");
-      return;
-    }
+  // Preload logo once for reuse in card rendering
+  const logoDataUrlRef = useRef<string | null>(null);
+  async function getLogoDataUrl(): Promise<string> {
+    if (logoDataUrlRef.current) return logoDataUrlRef.current;
+    const resp = await fetch("/logo-icon.png");
+    const blob = await resp.blob();
+    const dataUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+    logoDataUrlRef.current = dataUrl;
+    return dataUrl;
+  }
 
-    const svgEl = document.querySelector(
-      `[data-qr-attendee="${attendee.id}"] svg`
-    );
-    if (!svgEl) return;
-
-    const clonedSvg = svgEl.cloneNode(true) as SVGSVGElement;
-    clonedSvg.setAttribute("width", "400");
-    clonedSvg.setAttribute("height", "400");
-
-    // Convert embedded logo to data URL so it survives SVG serialization
-    const images = clonedSvg.querySelectorAll("image");
-    for (const image of images) {
-      const href = image.getAttribute("href") || image.getAttributeNS("http://www.w3.org/1999/xlink", "href");
-      if (href && !href.startsWith("data:")) {
-        try {
-          const resp = await fetch(href);
-          const blob = await resp.blob();
-          const dataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          image.setAttribute("href", dataUrl);
-        } catch { /* skip if fetch fails */ }
-      }
-    }
-
-    const rect = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "rect"
-    );
-    rect.setAttribute("width", "100%");
-    rect.setAttribute("height", "100%");
-    rect.setAttribute("fill", "white");
-    clonedSvg.insertBefore(rect, clonedSvg.firstChild);
-
-    const svgData = new XMLSerializer().serializeToString(clonedSvg);
+  // Render a QR pass card as a canvas blob
+  async function renderQRCard(attendee: Attendee, eventName: string): Promise<Blob | null> {
+    const W = 500, H = 680;
     const canvas = document.createElement("canvas");
-    canvas.width = 400;
-    canvas.height = 400;
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.onload = () => {
-      if (ctx) {
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, 400, 400);
-        ctx.drawImage(img, 0, 0, 400, 400);
+    if (!ctx) return null;
+
+    // Background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    // Top accent bar
+    ctx.fillStyle = "#2d3e50";
+    ctx.fillRect(0, 0, W, 6);
+
+    // If user has external QR image URL, load and draw it
+    const imageUrl = attendee.qrImageUrl || (attendee.qrCode?.startsWith("http") ? attendee.qrCode : null);
+    if (imageUrl) {
+      try {
+        const img = await loadImage(imageUrl);
+        const qrSize = 280;
+        const qrX = (W - qrSize) / 2;
+        ctx.drawImage(img, qrX, 50, qrSize, qrSize);
+      } catch {
+        // Fallback: draw placeholder
+        ctx.fillStyle = "#f3f4f6";
+        ctx.fillRect(110, 50, 280, 280);
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = "14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("QR Image", W / 2, 195);
       }
+    } else if (attendee.qrCode) {
+      // Render branded QR via hidden SVG → canvas
+      const svgEl = document.querySelector(`[data-qr-attendee="${attendee.id}"] svg`);
+      if (svgEl) {
+        const cloned = svgEl.cloneNode(true) as SVGSVGElement;
+        cloned.setAttribute("width", "280");
+        cloned.setAttribute("height", "280");
+        // Convert logo to data URL
+        const images = cloned.querySelectorAll("image");
+        const logoUrl = await getLogoDataUrl();
+        for (const image of images) {
+          const href = image.getAttribute("href") || image.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+          if (href && !href.startsWith("data:")) {
+            image.setAttribute("href", logoUrl);
+          }
+        }
+        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bg.setAttribute("width", "100%");
+        bg.setAttribute("height", "100%");
+        bg.setAttribute("fill", "white");
+        cloned.insertBefore(bg, cloned.firstChild);
+        const svgData = new XMLSerializer().serializeToString(cloned);
+        const qrImg = await loadImage("data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData))));
+        ctx.drawImage(qrImg, 110, 50, 280, 280);
+      }
+    }
+
+    // Divider line
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(40, 360);
+    ctx.lineTo(W - 40, 360);
+    ctx.stroke();
+
+    // Member name
+    ctx.fillStyle = "#2d3e50";
+    ctx.font = "bold 26px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(attendee.member.name, W / 2, 410);
+
+    // Event name
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "18px sans-serif";
+    ctx.fillText(eventName, W / 2, 448);
+
+    // Membership badge
+    if (attendee.member.membership) {
+      ctx.fillStyle = "#d4a537";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText(attendee.member.membership.replace(/_/g, " "), W / 2, 485);
+    }
+
+    // Bottom accent
+    ctx.fillStyle = "#2d3e50";
+    ctx.fillRect(0, H - 6, W, 6);
+
+    // QR value footer
+    if (attendee.qrCode && !attendee.qrCode.startsWith("http")) {
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "11px monospace";
+      ctx.fillText(attendee.qrCode, W / 2, H - 20);
+    }
+
+    return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"));
+  }
+
+  function loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  async function downloadQRCode(attendee: Attendee) {
+    if (!event) return;
+    const blob = await renderQRCard(attendee, event.name);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = `QR - ${attendee.member.name}.png`;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleBulkDownload() {
+    if (!event) return;
+    const attendeesWithQR = event.attendees.filter((a) => a.qrCode);
+    if (attendeesWithQR.length === 0) return;
+
+    setDownloading(true);
+    try {
+      const zip = new JSZip();
+      for (const attendee of attendeesWithQR) {
+        const blob = await renderQRCard(attendee, event.name);
+        if (blob) {
+          zip.file(`QR - ${attendee.member.name}.png`, blob);
+        }
+      }
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
       const link = document.createElement("a");
-      link.download = `QR - ${attendee.member.name}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.download = `QR Codes - ${event.name}.zip`;
+      link.href = url;
       link.click();
-    };
-    img.src =
-      "data:image/svg+xml;base64," +
-      btoa(unescape(encodeURIComponent(svgData)));
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to generate bulk download:", error);
+    } finally {
+      setDownloading(false);
+    }
   }
 
   const handleScan = useCallback(
@@ -515,6 +618,26 @@ export default function AttendancePage({
                 e.target.value = "";
               }}
             />
+            <button
+              onClick={handleBulkDownload}
+              disabled={downloading || withQR === 0}
+              className="px-4 py-2 bg-[#d4a537] text-white rounded-lg text-sm font-medium hover:bg-[#b8912e] transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              {downloading ? "Downloading..." : "Download All QR"}
+            </button>
             <span className="text-xs text-gray-400 self-center ml-2">
               {withQR}/{event.attendees.length} have QR codes
             </span>
