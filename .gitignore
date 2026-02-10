@@ -45,6 +45,9 @@ tmp_*.json
 # one-off scripts
 /scripts/
 
+# old database export
+/olddb/
+
 # loose project files
 *.xlsx
 *.jfif

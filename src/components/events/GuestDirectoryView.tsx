@@ -130,9 +130,9 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* White background */}
           <div className="absolute inset-0 bg-white" />
 
-          {/* Large faded S logo watermark in center */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06]">
-            <img src="/logo-icon.png" alt="" className="w-[420px] h-auto" style={{ filter: "grayscale(100%)" }} />
+          {/* Large faded S logo watermark - right side */}
+          <div className="absolute" style={{ top: "130px", right: "-130px", opacity: 0.06 }}>
+            <img src="/logo-icon.png" alt="" className="h-auto" style={{ width: "361px", filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -156,18 +156,18 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* Title - left aligned, vertically centered */}
           <div className="relative h-full flex flex-col justify-center px-16">
             <h1>
-              <span className="block text-[72px] font-extrabold leading-none tracking-tight" style={{ color: NAVY }}>
+              <span className="block text-[90px] font-extrabold leading-none" style={{ color: NAVY, letterSpacing: "5px" }}>
                 GUEST
               </span>
-              <span className="block text-[60px] font-extrabold leading-none tracking-tight mt-1" style={{ color: GOLD }}>
+              <span className="block text-[72px] font-extrabold leading-none mt-1" style={{ color: GOLD, letterSpacing: "3.6px" }}>
                 DIRECTORY
               </span>
             </h1>
           </div>
 
           {/* Bottom-left logo */}
-          <div className="absolute bottom-12 left-16">
-            <img src="/logo.png" alt="The Strategy Community" className="h-20 w-auto" />
+          <div className="absolute" style={{ bottom: "25mm", left: "143px" }}>
+            <img src="/logo.png" alt="The Strategy Community" style={{ width: "210px", height: "71px" }} />
           </div>
         </div>
 
@@ -265,50 +265,13 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           </div>
         ))}
 
-        {/* === CLOSING PAGE === */}
+        {/* === CLOSING PAGE (Back Cover Image) === */}
         <div
           data-pdf-page
-          className="relative bg-white mx-auto mb-8 print:mb-0 shadow-lg print:shadow-none"
+          className="relative mx-auto mb-8 print:mb-0 shadow-lg print:shadow-none"
           style={{ width: "210mm", height: "297mm", overflow: "hidden" }}
         >
-          {/* Navy top section ~80% */}
-          <div className="absolute top-0 left-0 right-0" style={{ height: "80%", backgroundColor: NAVY }}>
-            {/* Large faded logo watermark - right side */}
-            <div className="absolute top-1/2 right-8 -translate-y-1/2 opacity-[0.12]">
-              <img src="/logo-icon.png" alt="" className="w-[380px] h-auto" style={{ filter: "grayscale(100%)" }} />
-            </div>
-
-            {/* Text - left aligned */}
-            <div className="relative h-full flex flex-col justify-center px-16">
-              <h2 className="text-[52px] font-extrabold leading-[1.1]" style={{ color: "white" }}>
-                LOOKING
-              </h2>
-              <h2 className="text-[52px] font-extrabold leading-[1.1]" style={{ color: "white" }}>
-                FORWARD
-              </h2>
-              <h2 className="text-[64px] font-extrabold leading-[1.1] mt-2" style={{ color: GOLD }}>
-                TO
-              </h2>
-              <h2 className="text-[64px] font-extrabold leading-[1.1]" style={{ color: GOLD }}>
-                SEE
-              </h2>
-              <h2 className="text-[64px] font-extrabold leading-[1.1]" style={{ color: GOLD }}>
-                YOU!
-              </h2>
-            </div>
-
-            {/* Gold corner bracket - bottom right of navy section */}
-            <div className="absolute bottom-6 right-8 w-8 h-8 border-b-[4px] border-r-[4px]" style={{ borderColor: GOLD }} />
-          </div>
-
-          {/* White bottom section ~20% */}
-          <div className="absolute bottom-0 left-0 right-0 flex items-center px-16" style={{ height: "20%", backgroundColor: "white" }}>
-            <div className="relative">
-              {/* Navy corner bracket - top right of logo area */}
-              <div className="absolute -top-3 -right-4 w-5 h-5 border-t-[3px] border-r-[3px]" style={{ borderColor: NAVY }} />
-              <img src="/logo.png" alt="The Strategy Community" className="w-auto" style={{ height: "30mm" }} />
-            </div>
-          </div>
+          <img src="/BACKCOVER.jpg" alt="Back Cover" className="absolute inset-0 w-full h-full object-cover" />
         </div>
       </div>
     </div>
