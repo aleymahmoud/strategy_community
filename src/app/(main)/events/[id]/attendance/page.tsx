@@ -104,17 +104,26 @@ export default function AttendancePage({
     }
   }
 
-  async function handleResetAttendance() {
-    if (!confirm("Reset all QR codes and mark everyone back to CONFIRMED?")) return;
+  async function handleResetMember(attendeeId: string) {
     try {
-      const res = await fetch(`/api/events/${id}/attendees/reset-attendance`, {
-        method: "POST",
+      const res = await fetch(`/api/events/${id}/attendees/${attendeeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrCode: null, status: "CONFIRMED" }),
       });
       if (res.ok) {
-        await fetchEvent();
+        setEvent((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            attendees: prev.attendees.map((a) =>
+              a.id === attendeeId ? { ...a, qrCode: null, status: "CONFIRMED" } : a
+            ),
+          };
+        });
       }
     } catch (error) {
-      console.error("Failed to reset attendance:", error);
+      console.error("Failed to reset member:", error);
     }
   }
 
@@ -446,15 +455,6 @@ export default function AttendancePage({
                 e.target.value = "";
               }}
             />
-            <button
-              onClick={handleResetAttendance}
-              className="px-4 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Reset
-            </button>
             <span className="text-xs text-gray-400 self-center ml-2">
               {withQR}/{event.attendees.length} have QR codes
             </span>
@@ -522,14 +522,16 @@ export default function AttendancePage({
                               size={56}
                               fgColor="#223167"
                               level="M"
-                              imageSettings={{
-                                src: "/logo-icon.png",
-                                x: undefined,
-                                y: undefined,
-                                height: 14,
-                                width: 14,
-                                excavate: true,
-                              }}
+                              {...(attendee.qrCode === attendee.id ? {
+                                imageSettings: {
+                                  src: "/logo-icon.png",
+                                  x: undefined,
+                                  y: undefined,
+                                  height: 14,
+                                  width: 14,
+                                  excavate: true,
+                                }
+                              } : {})}
                             />
                           </div>
                         ) : editingQR === attendee.id ? (
@@ -576,27 +578,30 @@ export default function AttendancePage({
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {attendee.qrCode && (
-                          <button
-                            onClick={() => downloadQRCode(attendee)}
-                            className="text-[#d4a537] hover:text-[#b8912e] transition-colors text-xs font-medium"
-                            title="Download QR"
-                          >
-                            <svg
-                              className="w-5 h-5 inline"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                          </button>
-                        )}
+                        <div className="flex items-center justify-end gap-2">
+                          {attendee.qrCode && (
+                            <>
+                              <button
+                                onClick={() => downloadQRCode(attendee)}
+                                className="text-[#d4a537] hover:text-[#b8912e] transition-colors"
+                                title="Download QR"
+                              >
+                                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleResetMember(attendee.id)}
+                                className="text-gray-300 hover:text-red-500 transition-colors"
+                                title="Reset QR & status"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
