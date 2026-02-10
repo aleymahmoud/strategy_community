@@ -24,7 +24,9 @@ export async function GET(
       "Member Name": a.member.name,
       Status: a.status,
       "Current QR Code": a.qrCode || "",
+      "Current QR Image URL": a.qrImageUrl || "",
       "New QR Code (fill in)": "",
+      "New QR Image URL (fill in)": "",
     }));
 
     const wb = XLSX.utils.book_new();
@@ -36,7 +38,9 @@ export async function GET(
       { wch: 30 }, // Member Name
       { wch: 12 }, // Status
       { wch: 30 }, // Current QR Code
+      { wch: 40 }, // Current QR Image URL
       { wch: 30 }, // New QR Code
+      { wch: 40 }, // New QR Image URL
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, "QR Codes");
@@ -86,8 +90,9 @@ export async function POST(
     for (const row of rows) {
       const attendeeId = row["Attendee ID"];
       const newQrCode = row["New QR Code (fill in)"];
+      const newQrImageUrl = row["New QR Image URL (fill in)"];
 
-      if (!attendeeId || !newQrCode) continue;
+      if (!attendeeId || (!newQrCode && !newQrImageUrl)) continue;
 
       // Verify the attendee belongs to this event
       const attendee = await prisma.eventAttendee.findFirst({
@@ -95,9 +100,12 @@ export async function POST(
       });
 
       if (attendee) {
+        const data: Record<string, string> = {};
+        if (newQrCode) data.qrCode = newQrCode;
+        if (newQrImageUrl) data.qrImageUrl = newQrImageUrl;
         await prisma.eventAttendee.update({
           where: { id: attendeeId },
-          data: { qrCode: newQrCode },
+          data,
         });
         updatedCount++;
       }

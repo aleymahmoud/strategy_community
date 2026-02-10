@@ -11,7 +11,7 @@ export async function POST(
     // Clear all QR codes for this event
     await prisma.eventAttendee.updateMany({
       where: { eventId: id },
-      data: { qrCode: null },
+      data: { qrCode: null, qrImageUrl: null },
     });
 
     // Reset ATTENDED back to CONFIRMED
