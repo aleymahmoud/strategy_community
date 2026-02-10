@@ -23,6 +23,8 @@ interface Attendee {
 interface EventData {
   id: string;
   name: string;
+  date: string;
+  location: string | null;
   attendees: Attendee[];
 }
 
@@ -206,8 +208,8 @@ export default function AttendancePage({
   }
 
   // Render a QR pass card as a canvas blob
-  async function renderQRCard(attendee: Attendee, eventName: string): Promise<Blob | null> {
-    const W = 500, H = 680;
+  async function renderQRCard(attendee: Attendee, eventName: string, eventDate?: string, eventLocation?: string | null): Promise<Blob | null> {
+    const W = 500, H = 720;
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
@@ -278,12 +280,33 @@ export default function AttendancePage({
     ctx.fillStyle = "#2d3e50";
     ctx.font = "bold 26px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(attendee.member.name, W / 2, 410);
+    ctx.fillText(attendee.member.name, W / 2, 405);
 
     // Event name
     ctx.fillStyle = "#d4a537";
     ctx.font = "bold 18px sans-serif";
-    ctx.fillText(eventName, W / 2, 450);
+    ctx.fillText(eventName, W / 2, 445);
+
+    // Location
+    if (eventLocation) {
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "15px sans-serif";
+      ctx.fillText(eventLocation, W / 2, 478);
+    }
+
+    // Date
+    if (eventDate) {
+      const formatted = new Date(eventDate).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Africa/Cairo",
+      });
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "14px sans-serif";
+      ctx.fillText(formatted, W / 2, eventLocation ? 508 : 478);
+    }
 
     // Bottom accent
     ctx.fillStyle = "#2d3e50";
@@ -304,7 +327,7 @@ export default function AttendancePage({
 
   async function downloadQRCode(attendee: Attendee) {
     if (!event) return;
-    const blob = await renderQRCard(attendee, event.name);
+    const blob = await renderQRCard(attendee, event.name, event.date, event.location);
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -323,7 +346,7 @@ export default function AttendancePage({
     try {
       const zip = new JSZip();
       for (const attendee of attendeesWithQR) {
-        const blob = await renderQRCard(attendee, event.name);
+        const blob = await renderQRCard(attendee, event.name, event.date, event.location);
         if (blob) {
           zip.file(`QR - ${attendee.member.name}.png`, blob);
         }
