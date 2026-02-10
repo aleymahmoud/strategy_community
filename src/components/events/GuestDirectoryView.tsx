@@ -17,7 +17,7 @@ interface GuestDirectoryViewProps {
   guests: Guest[];
 }
 
-const GUESTS_PER_PAGE = 8;
+const GUESTS_PER_PAGE = 10;
 const NAVY = "#223167";
 const GOLD = "#f5ae27";
 
@@ -130,9 +130,9 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* White background */}
           <div className="absolute inset-0 bg-white" />
 
-          {/* Large faded S logo watermark in center */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06]">
-            <img src="/logo-icon.png" alt="" className="w-[420px] h-auto" style={{ filter: "grayscale(100%)" }} />
+          {/* Large faded S logo watermark - right side, partially off-page */}
+          <div className="absolute opacity-[0.06]" style={{ top: "46mm", right: "-76mm" }}>
+            <img src="/logo-icon.png" alt="" style={{ width: "127mm", height: "196mm", filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -156,18 +156,18 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* Title - left aligned, vertically centered */}
           <div className="relative h-full flex flex-col justify-center px-16">
             <h1>
-              <span className="block text-[72px] font-extrabold leading-none tracking-tight" style={{ color: NAVY }}>
+              <span className="block text-[90px] font-extrabold leading-none" style={{ color: NAVY, letterSpacing: "5px" }}>
                 GUEST
               </span>
-              <span className="block text-[60px] font-extrabold leading-none tracking-tight mt-1" style={{ color: GOLD }}>
+              <span className="block text-[72px] font-extrabold leading-none mt-1" style={{ color: GOLD, letterSpacing: "50px" }}>
                 DIRECTORY
               </span>
             </h1>
           </div>
 
-          {/* Bottom-left logo */}
-          <div className="absolute bottom-12 left-16">
-            <img src="/logo.png" alt="The Strategy Community" className="h-20 w-auto" />
+          {/* Bottom logo */}
+          <div className="absolute" style={{ bottom: "26mm", left: "50mm" }}>
+            <img src="/logo.png" alt="The Strategy Community" style={{ width: "74mm", height: "auto" }} />
           </div>
         </div>
 
@@ -194,19 +194,19 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
             {/* Guest Grid - 2 columns x 4 rows, spread to fill page */}
-            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 80mm - 50mm)", paddingTop: "20px", paddingBottom: "8px" }}>
+            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 70mm - 42mm)", paddingTop: "14px", paddingBottom: "4px" }}>
               {/* Split guests into rows of 2 */}
               {Array.from({ length: Math.ceil(pageGuests.length / 2) }, (_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-2 gap-x-10">
                   {pageGuests.slice(rowIdx * 2, rowIdx * 2 + 2).map((guest) => (
-                    <div key={guest.id} className="flex items-start gap-5">
+                    <div key={guest.id} className="flex items-start gap-4">
                       {/* Photo - Arch frame */}
                       <div
                         className="flex-shrink-0 overflow-hidden border-2 border-gray-200"
                         style={{
-                          width: 78,
-                          height: 100,
-                          borderRadius: "30px 0 0 0",
+                          width: 66,
+                          height: 85,
+                          borderRadius: "25px 0 0 0",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                         }}
                       >
