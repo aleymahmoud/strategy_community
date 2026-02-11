@@ -199,7 +199,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
             {/* Guest Grid - 2 columns x 5 rows, spread to fill page */}
-            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
+            <div className="relative px-12 flex flex-col justify-between gap-y-4" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
               {/* Split guests into rows of 2 */}
               {Array.from({ length: Math.ceil(pageGuests.length / 2) }, (_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-2 gap-x-10">
