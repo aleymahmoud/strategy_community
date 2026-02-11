@@ -7,6 +7,7 @@ import {
   formatMembership,
   membershipOrder,
   calculateMemberScore,
+  classifyMemberScore,
   classifyTableScore,
   checkTableImbalance,
 } from "@/lib/constants";
@@ -247,6 +248,19 @@ export default function SeatingPage({
     const isEmpty = !assignment;
     const isHovered = hoveredSeatLabel === seatLabel && isDragActive && isEmpty;
 
+    // Color seated members by score label
+    let seatBg = "bg-green-500 hover:bg-green-600";
+    if (assignment) {
+      const score = calculateMemberScore(assignment.member);
+      if (score !== null) {
+        const { label } = classifyMemberScore(score);
+        if (label === "Premium") seatBg = "bg-amber-500 hover:bg-amber-600";
+        else if (label === "Elite") seatBg = "bg-blue-500 hover:bg-blue-600";
+        else if (label === "Core") seatBg = "bg-green-500 hover:bg-green-600";
+        else seatBg = "bg-gray-500 hover:bg-gray-600";
+      }
+    }
+
     return (
       <div
         key={key}
@@ -254,7 +268,7 @@ export default function SeatingPage({
         data-seat-empty={isEmpty ? "true" : "false"}
         className={`absolute flex items-center justify-center font-medium transition-all select-none ${
           assignment
-            ? "bg-green-500 text-white h-7 px-2.5 rounded-full shadow-sm text-[11px] cursor-grab active:cursor-grabbing hover:bg-green-600"
+            ? `${seatBg} text-white h-7 px-2.5 rounded-full shadow-sm text-[11px] cursor-grab active:cursor-grabbing`
             : isHovered
             ? "border-2 border-purple-500 bg-purple-400 text-white rounded-full text-xs scale-125 ring-2 ring-purple-300"
             : isDragActive && isEmpty
