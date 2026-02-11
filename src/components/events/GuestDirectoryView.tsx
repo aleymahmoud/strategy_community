@@ -130,9 +130,9 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* White background */}
           <div className="absolute inset-0 bg-white" />
 
-          {/* Full watermark logo - centered */}
-          <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.06 }}>
-            <img src="/logo.png" alt="" style={{ width: "500px", height: "auto", filter: "grayscale(100%)" }} />
+          {/* Watermark - compass icon, large, shifted right */}
+          <div className="absolute inset-0 flex items-center justify-end" style={{ opacity: 0.06 }}>
+            <img src="/logo-icon.png" alt="" style={{ width: "800px", height: "auto", marginRight: "-150px", filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -182,9 +182,9 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             {/* Background */}
             <div className="absolute inset-0 bg-white" />
 
-            {/* Watermark */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.04 }}>
-              <img src="/logo.png" alt="" style={{ width: "500px", height: "auto", filter: "grayscale(100%)" }} />
+            {/* Watermark - compass icon, large, shifted right */}
+            <div className="absolute inset-0 flex items-center justify-end" style={{ opacity: 0.04 }}>
+              <img src="/logo-icon.png" alt="" style={{ width: "800px", height: "auto", marginRight: "-150px", filter: "grayscale(100%)" }} />
             </div>
 
             {/* Header */}
