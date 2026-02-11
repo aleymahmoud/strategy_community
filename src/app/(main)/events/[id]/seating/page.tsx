@@ -92,6 +92,7 @@ export default function SeatingPage({
     y: number;
   } | null>(null);
   const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -436,32 +437,106 @@ export default function SeatingPage({
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500" />
-            <span className="text-xs text-gray-600">Premium (10+)</span>
+          <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-amber-500" />
+              <span className="text-xs text-gray-600">Premium (10+)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-blue-500" />
+              <span className="text-xs text-gray-600">Elite (8-9)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="text-xs text-gray-600">Core (7)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-gray-500" />
+              <span className="text-xs text-gray-600">Regular (&lt;7)</span>
+            </div>
+            <span className="mx-1 text-gray-300">|</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-xs text-gray-600">Elite (8-9)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="text-xs text-gray-600">Core (7)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-gray-500" />
-            <span className="text-xs text-gray-600">Regular (&lt;7)</span>
-          </div>
-          <span className="mx-1 text-gray-300">|</span>
           <div className="text-sm text-gray-600">
             {seatedAttendees.length}/{event.attendees.length} seated
           </div>
+          <button
+            onClick={() => setShowMobilePanel(true)}
+            className="lg:hidden px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg"
+          >
+            Attendees
+          </button>
         </div>
       </div>
 
-      <div className="flex gap-4 h-full">
-        {/* Attendees Panel */}
-        <div className="w-72 bg-white rounded-lg shadow p-4 overflow-y-auto flex-shrink-0">
+      <div className="flex flex-col lg:flex-row gap-4 h-full">
+        {/* Mobile Attendees Overlay */}
+        {showMobilePanel && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobilePanel(false)} />
+            <div className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-xl p-4 overflow-y-auto">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-gray-800">
+                  Attendees ({event.attendees.length})
+                </h3>
+                <button onClick={() => setShowMobilePanel(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              {unseatedAttendees.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm text-gray-500 mb-2">Unseated ({unseatedAttendees.length})</h4>
+                  {[...membershipOrder, "UNKNOWN"].map((type) => {
+                    const group = unseatedByMembership[type];
+                    if (!group || group.length === 0) return null;
+                    const colors = membershipColors[type];
+                    return (
+                      <div key={type} className="mb-2">
+                        <div className={`text-[10px] font-semibold px-2 py-1 rounded ${colors ? `${colors.bg} ${colors.text}` : "bg-gray-100 text-gray-500"}`}>
+                          {type === "UNKNOWN" ? "Unclassified" : formatMembership(type)} ({group.length})
+                        </div>
+                        <div className="space-y-1 mt-1">
+                          {group.map((attendee) => (
+                            <div
+                              key={attendee.id}
+                              onPointerDown={(e) => { startDrag(e, attendee.id, attendee.member.name); setShowMobilePanel(false); }}
+                              className="w-full text-left px-3 py-1.5 rounded text-sm bg-gray-50 hover:bg-gray-100 cursor-grab active:cursor-grabbing select-none"
+                            >
+                              <span className="truncate">{attendee.member.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {seatedAttendees.length > 0 && (
+                <div>
+                  <h4 className="text-sm text-gray-500 mb-2">Seated</h4>
+                  <div className="space-y-1">
+                    {seatedAttendees.map((attendee) => (
+                      <div key={attendee.id} className="flex justify-between items-center px-3 py-2 bg-green-50 rounded text-sm">
+                        <span className="truncate">{attendee.member.name}</span>
+                        <button
+                          onClick={() => assignSeat(attendee.id, null)}
+                          className="text-red-500 hover:text-red-700 text-xs flex-shrink-0 ml-2"
+                          disabled={saving}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Attendees Panel (Desktop) */}
+        <div className="hidden lg:block w-72 bg-white rounded-lg shadow p-4 overflow-y-auto flex-shrink-0">
           <h3 className="font-semibold text-gray-800 mb-3">
             Attendees ({event.attendees.length})
           </h3>
