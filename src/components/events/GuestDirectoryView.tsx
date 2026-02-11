@@ -132,7 +132,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
 
           {/* Watermark - compass icon, large, shifted right */}
           <div className="absolute inset-0 flex items-center justify-end" style={{ opacity: 0.06 }}>
-            <img src="/logo-icon.png" alt="" style={{ width: "600px", height: "auto", marginRight: "-100px", filter: "grayscale(100%)" }} />
+            <img src="/logo-icon.png" alt="" style={{ width: "550px", height: "auto", marginRight: "-50px", filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -184,7 +184,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
 
             {/* Watermark - compass icon, large, shifted right */}
             <div className="absolute inset-0 flex items-center justify-end" style={{ opacity: 0.04 }}>
-              <img src="/logo-icon.png" alt="" style={{ width: "600px", height: "auto", marginRight: "-100px", filter: "grayscale(100%)" }} />
+              <img src="/logo-icon.png" alt="" style={{ width: "550px", height: "auto", marginRight: "-50px", filter: "grayscale(100%)" }} />
             </div>
 
             {/* Header */}
