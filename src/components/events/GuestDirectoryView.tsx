@@ -32,6 +32,8 @@ const TABLES_PER_PAGE = 4;
 export default function GuestDirectoryView({ eventName, eventDate, guests, seatingTables = [] }: GuestDirectoryViewProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"guests" | "seating">("guests");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Split guests into pages
   const guestPages: Guest[][] = [];
@@ -133,8 +135,108 @@ export default function GuestDirectoryView({ eventName, eventDate, guests, seati
         </div>
       </div>
 
-      {/* PDF Content */}
-      <div ref={printRef} className="max-w-5xl mx-auto py-8 print:p-0 print:max-w-none" style={{ fontFamily: "'Kohinoor Bangla', system-ui, sans-serif" }}>
+      {/* Mobile View */}
+      <div className="lg:hidden print:hidden px-4 py-4" style={{ fontFamily: "'Kohinoor Bangla', system-ui, sans-serif" }}>
+        {/* Search */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search guests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setMobileTab("guests")}
+            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors ${
+              mobileTab === "guests"
+                ? "text-white"
+                : "bg-gray-100 text-gray-600"
+            }`}
+            style={mobileTab === "guests" ? { backgroundColor: NAVY } : undefined}
+          >
+            Guests ({guests.length})
+          </button>
+          {seatingTables.length > 0 && (
+            <button
+              onClick={() => setMobileTab("seating")}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                mobileTab === "seating"
+                  ? "text-white"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+              style={mobileTab === "seating" ? { backgroundColor: NAVY } : undefined}
+            >
+              Seating ({seatingTables.length})
+            </button>
+          )}
+        </div>
+
+        {/* Guest Cards */}
+        {mobileTab === "guests" && (
+          <div className="space-y-2">
+            {guests
+              .filter((g) =>
+                searchQuery
+                  ? g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    g.company.toLowerCase().includes(searchQuery.toLowerCase())
+                  : true
+              )
+              .map((guest) => (
+                <div key={guest.id} className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                  <div
+                    className="flex-shrink-0 overflow-hidden"
+                    style={{ width: 48, height: 48, borderRadius: "14px 0 0 0" }}
+                  >
+                    {guest.photo ? (
+                      <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-gray-100 to-gray-200"
+                        style={{ color: NAVY }}
+                      >
+                        {guest.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold truncate" style={{ color: NAVY }}>{guest.name}</p>
+                    {guest.title && <p className="text-xs text-gray-500 truncate">{guest.title}</p>}
+                    {guest.company && <p className="text-xs font-medium truncate" style={{ color: GOLD }}>{guest.company}</p>}
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* Seating Tables */}
+        {mobileTab === "seating" && (
+          <div className="space-y-3">
+            {seatingTables.map((table, idx) => (
+              <div key={idx} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="px-4 py-2.5" style={{ backgroundColor: NAVY }}>
+                  <h3 className="text-sm font-bold" style={{ color: GOLD }}>{table.name}</h3>
+                </div>
+                <div className="px-4 py-2">
+                  {table.members.map((member, mIdx) => (
+                    <p key={mIdx} className="text-sm py-1 border-b border-gray-50 last:border-0" style={{ color: NAVY }}>
+                      {member}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* PDF Content (Desktop + Print) */}
+      <div ref={printRef} className="hidden lg:block print:!block max-w-5xl mx-auto py-8 print:p-0 print:max-w-none" style={{ fontFamily: "'Kohinoor Bangla', system-ui, sans-serif" }}>
         {/* === COVER PAGE === */}
         <div
           data-pdf-page
