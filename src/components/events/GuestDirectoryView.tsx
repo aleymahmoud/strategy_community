@@ -324,7 +324,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests, seati
                     className="px-4 py-2 flex-shrink-0"
                     style={{ backgroundColor: NAVY, borderRadius: "6px 6px 0 0" }}
                   >
-                    <h3 className="text-[32px] font-bold tracking-wide" style={{ color: GOLD }}>
+                    <h3 className="text-[24px] font-bold tracking-wide" style={{ color: GOLD }}>
                       {table.name}
                     </h3>
                   </div>
@@ -336,7 +336,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests, seati
                     {table.members.map((member, mIdx) => (
                       <p
                         key={mIdx}
-                        className="text-[24px] leading-relaxed font-medium"
+                        className="text-[18px] leading-relaxed font-medium"
                         style={{ color: NAVY }}
                       >
                         {member}
