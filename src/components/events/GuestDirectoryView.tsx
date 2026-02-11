@@ -17,7 +17,7 @@ interface GuestDirectoryViewProps {
   guests: Guest[];
 }
 
-const GUESTS_PER_PAGE = 14;
+const GUESTS_PER_PAGE = 12;
 const NAVY = "#223167";
 const GOLD = "#f5ae27";
 
