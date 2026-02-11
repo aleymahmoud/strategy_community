@@ -317,7 +317,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests, seati
                 <div
                   key={tableIdx}
                   className="flex flex-col overflow-hidden"
-                  style={{ height: "calc((100% - 16px) / 2)" }}
+                  style={{ height: "300px" }}
                 >
                   {/* Table header */}
                   <div
