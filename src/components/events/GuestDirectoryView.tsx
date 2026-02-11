@@ -11,24 +11,38 @@ interface Guest {
   photo: string | null;
 }
 
+interface SeatingTable {
+  name: string;
+  members: string[];
+}
+
 interface GuestDirectoryViewProps {
   eventName: string;
   eventDate: string;
   guests: Guest[];
+  seatingTables?: SeatingTable[];
 }
 
 const GUESTS_PER_PAGE = 12;
 const NAVY = "#223167";
 const GOLD = "#f5ae27";
 
-export default function GuestDirectoryView({ eventName, eventDate, guests }: GuestDirectoryViewProps) {
+const TABLES_PER_PAGE = 4;
+
+export default function GuestDirectoryView({ eventName, eventDate, guests, seatingTables = [] }: GuestDirectoryViewProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
-  // Split guests into pages of 8
+  // Split guests into pages
   const guestPages: Guest[][] = [];
   for (let i = 0; i < guests.length; i += GUESTS_PER_PAGE) {
     guestPages.push(guests.slice(i, i + GUESTS_PER_PAGE));
+  }
+
+  // Split seating tables into pages of 4
+  const seatingPages: SeatingTable[][] = [];
+  for (let i = 0; i < seatingTables.length; i += TABLES_PER_PAGE) {
+    seatingPages.push(seatingTables.slice(i, i + TABLES_PER_PAGE));
   }
 
   async function handleDownloadPDF() {
@@ -183,7 +197,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             <div className="absolute inset-0 bg-white" />
 
             {/* Watermark - compass icon, centered */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.04 }}>
+            <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.06 }}>
               <img src="/logo-icon.png" alt="" style={{ width: "550px", height: "auto", filter: "grayscale(100%)" }} />
             </div>
 
@@ -199,7 +213,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
             {/* Guest Grid - 2 columns x 5 rows, spread to fill page */}
-            <div className="relative px-12 flex flex-col justify-between gap-y-8" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
+            <div className="relative px-12 flex flex-col justify-between gap-y-16" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
               {/* Split guests into rows of 2 */}
               {Array.from({ length: Math.ceil(pageGuests.length / 2) }, (_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-2 gap-x-10">
@@ -254,6 +268,81 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
                       </div>
                     </div>
                   ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="absolute bottom-0 left-0 right-0">
+              <div className="px-12 pb-6 flex items-center justify-between">
+                <p className="text-[10px] tracking-[0.12em] uppercase font-extrabold" style={{ color: GOLD }}>
+                  This is an exclusive event and attendance requires an invitation
+                </p>
+                <img src="/logo-icon.png" alt="" className="h-10 w-auto" />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* === SEATING PLAN PAGES === */}
+        {seatingPages.map((pageTables, pageIdx) => (
+          <div
+            key={`seating-${pageIdx}`}
+            data-pdf-page
+            className="relative bg-white mx-auto mb-8 print:mb-0 print:break-after-page shadow-lg print:shadow-none"
+            style={{ width: "210mm", height: "297mm", overflow: "hidden" }}
+          >
+            {/* Background */}
+            <div className="absolute inset-0 bg-white" />
+
+            {/* Watermark - compass icon, centered */}
+            <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.06 }}>
+              <img src="/logo-icon.png" alt="" style={{ width: "550px", height: "auto", filter: "grayscale(100%)" }} />
+            </div>
+
+            {/* Header */}
+            <div className="relative px-12 pt-8 pb-4">
+              <h2 className="text-[36px] font-bold leading-none">
+                <span style={{ color: NAVY }}>SEATING </span>
+                <span style={{ color: GOLD }}>PLAN</span>
+              </h2>
+            </div>
+
+            {/* Gold divider line */}
+            <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
+
+            {/* Tables grid - 4 tables filling available space */}
+            <div className="relative px-12 grid grid-cols-2 gap-x-8 gap-y-6" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
+              {pageTables.map((table, tableIdx) => (
+                <div
+                  key={tableIdx}
+                  className="flex flex-col overflow-hidden"
+                  style={{ height: "calc((100% - 24px) / 2)" }}
+                >
+                  {/* Table header */}
+                  <div
+                    className="px-4 py-2 flex-shrink-0"
+                    style={{ backgroundColor: NAVY, borderRadius: "6px 6px 0 0" }}
+                  >
+                    <h3 className="text-[16px] font-bold tracking-wide" style={{ color: GOLD }}>
+                      {table.name}
+                    </h3>
+                  </div>
+                  {/* Table members */}
+                  <div
+                    className="flex-1 px-4 py-2 border border-t-0"
+                    style={{ borderColor: "#e5e7eb", borderRadius: "0 0 6px 6px" }}
+                  >
+                    {table.members.map((member, mIdx) => (
+                      <p
+                        key={mIdx}
+                        className="text-[12px] leading-relaxed font-medium"
+                        style={{ color: NAVY }}
+                      >
+                        {member}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
