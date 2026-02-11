@@ -435,8 +435,27 @@ export default function SeatingPage({
             Seating: {event.name}
           </h1>
         </div>
-        <div className="text-sm text-gray-600">
-          {seatedAttendees.length}/{event.attendees.length} seated
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-amber-500" />
+            <span className="text-xs text-gray-600">Premium (10+)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-blue-500" />
+            <span className="text-xs text-gray-600">Elite (8-9)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-green-500" />
+            <span className="text-xs text-gray-600">Core (7)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-gray-500" />
+            <span className="text-xs text-gray-600">Regular (&lt;7)</span>
+          </div>
+          <span className="mx-1 text-gray-300">|</span>
+          <div className="text-sm text-gray-600">
+            {seatedAttendees.length}/{event.attendees.length} seated
+          </div>
         </div>
       </div>
 
