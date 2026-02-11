@@ -312,7 +312,7 @@ export default function GuestDirectoryView({ eventName, eventDate, guests, seati
             <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
             {/* Tables grid - 4 tables filling available space */}
-            <div className="relative px-12 grid grid-cols-2 gap-x-8 gap-y-4" style={{ height: "calc(297mm - 70mm - 30mm)", paddingTop: "12px", paddingBottom: "4px" }}>
+            <div className="relative px-12 grid grid-cols-2 gap-x-8 gap-y-4" style={{ height: "calc(297mm - 55mm - 22mm)", paddingTop: "12px", paddingBottom: "4px" }}>
               {pageTables.map((table, tableIdx) => (
                 <div
                   key={tableIdx}
