@@ -17,7 +17,7 @@ interface GuestDirectoryViewProps {
   guests: Guest[];
 }
 
-const GUESTS_PER_PAGE = 8;
+const GUESTS_PER_PAGE = 10;
 const NAVY = "#223167";
 const GOLD = "#f5ae27";
 
@@ -130,9 +130,9 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
           {/* White background */}
           <div className="absolute inset-0 bg-white" />
 
-          {/* Large faded S logo watermark - right side */}
-          <div className="absolute" style={{ top: "130px", right: "-130px", opacity: 0.06 }}>
-            <img src="/logo-icon.png" alt="" className="h-auto" style={{ width: "361px", filter: "grayscale(100%)" }} />
+          {/* Full watermark logo - centered */}
+          <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.06 }}>
+            <img src="/logo-icon.png" alt="" style={{ width: "500px", height: "auto", filter: "grayscale(100%)" }} />
           </div>
 
           {/* Top-right event name with corner bracket */}
@@ -182,6 +182,11 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             {/* Background */}
             <div className="absolute inset-0 bg-white" />
 
+            {/* Watermark */}
+            <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: 0.04 }}>
+              <img src="/logo-icon.png" alt="" style={{ width: "500px", height: "auto", filter: "grayscale(100%)" }} />
+            </div>
+
             {/* Header */}
             <div className="relative px-12 pt-8 pb-4">
               <h2 className="text-[36px] font-bold leading-none">
@@ -193,8 +198,8 @@ export default function GuestDirectoryView({ eventName, eventDate, guests }: Gue
             {/* Gold divider line */}
             <div className="mx-12 h-[2px]" style={{ backgroundColor: GOLD }} />
 
-            {/* Guest Grid - 2 columns x 4 rows, spread to fill page */}
-            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 80mm - 50mm)", paddingTop: "20px", paddingBottom: "8px" }}>
+            {/* Guest Grid - 2 columns x 5 rows, spread to fill page */}
+            <div className="relative px-12 flex flex-col justify-between" style={{ height: "calc(297mm - 80mm - 40mm)", paddingTop: "16px", paddingBottom: "4px" }}>
               {/* Split guests into rows of 2 */}
               {Array.from({ length: Math.ceil(pageGuests.length / 2) }, (_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-2 gap-x-10">
