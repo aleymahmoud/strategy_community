@@ -27,6 +27,8 @@ export async function GET(
 
     const rows = attendees.map((a) => ({
       "Name": a.member.name,
+      "Email": a.member.email || "",
+      "Phone": a.member.phone || "",
       "Membership": a.member.membership || "",
       "Status": a.status,
       "Company": a.member.company || "",
@@ -38,6 +40,8 @@ export async function GET(
 
     ws["!cols"] = [
       { wch: 30 }, // Name
+      { wch: 30 }, // Email
+      { wch: 18 }, // Phone
       { wch: 16 }, // Membership
       { wch: 14 }, // Status
       { wch: 30 }, // Company
